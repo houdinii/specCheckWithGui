@@ -1,11 +1,13 @@
-import pywifi
+from json import JSONDecodeError
+
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtWidgets import QMainWindow, QDialog, QDialogButtonBox, QVBoxLayout, QLabel
-from PyQt5.QtCore import QMutex, QTimer, QObject, QThread, pyqtSignal
+from PyQt5.QtWidgets import QMainWindow, QDialog
+# from PyQt5.QtWidgets import QDialogButtonBox, QVBoxLayout, QLabel
+# from PyQt5.QtCore import QMutex, QTimer, QObject, QThread, pyqtSignal
 from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
 # from spec_checker.modules.speedtest.test_speed import check_speed
-import soundcard
+# import soundcard
 import GPUtil
 import psutil
 import requests
@@ -16,7 +18,10 @@ from datetime import datetime
 
 # import multiprocessing
 import sys
-import json
+if sys.platform.startswith('win32'):
+    import pywifi
+    import soundcard
+# import json
 
 # speedtest_results = {}
 # mutex = QMutex()
@@ -73,6 +78,7 @@ class AboutBox(QDialog, Ui_AboutBox):
         self.setupUi(self)
 
 
+# noinspection PyMethodMayBeStatic
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -86,6 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.audioInfo = {}
         self.list_gpus = []
         self.cpuInfo = {}
+        self.networkInfo = {}
         self.hard_drive_list = []
         self.locationInfo = {}
         self.memoryInfo = {}
@@ -141,7 +148,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.runSpeedtest()
         self.progressBar.setValue(0)
         self.updateStatus("Starting Audio Test......")
-        raw_audio_info = self.audio_test()
+        if sys.platform.startswith('win32'):
+            raw_audio_info = self.audio_test()
         print(self.audioInfo)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(11)
@@ -275,7 +283,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         try:
             response_json = response.json()
         except JSONDecodeError as e:
-            print("%sError%s" % (Fore.RED, Fore.RESET), e)
             response_json["ip"] = "Error with remote website. This is not an error with the client."
             response_json["city"] = "Error with remote website. This is not an error with the client."
             response_json["region"] = "Error with remote website. This is not an error with the client."
@@ -323,10 +330,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         'ip_address': str(address.address)
                     }
                     network_list.append(network_object)
-
-        wifi = pywifi.PyWiFi()
-        iface = wifi.interfaces()[0]
-        wifi_status = self.get_wifi_status(iface)
+        wifi_status = {}
+        if sys.platform.startswith('win32'):
+            wifi = pywifi.PyWiFi()
+            iface = wifi.interfaces()[0]
+            wifi_status = self.get_wifi_status(iface)
         self.networkInfo = {
             'network_list': network_list,
             'wifi_status': wifi_status
@@ -352,7 +360,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         uname = platform.uname()
         boot_time = datetime.fromtimestamp(psutil.boot_time())
 
-        formatted_b_time = f"{boot_time.month}/{boot_time.day}/{boot_time.year} {boot_time.hour}:{boot_time.minute}:{boot_time.second}"
+        formatted_b_time = f"{boot_time.month}/{boot_time.day}/{boot_time.year}"\
+                           + f"{boot_time.hour}:{boot_time.minute}:{boot_time.second}"
         self.systemInfo = {
             'system_type': uname.system,
             'computer_name': uname.node,
