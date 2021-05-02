@@ -2,60 +2,19 @@ from json import JSONDecodeError
 
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import QMainWindow, QDialog
-# from PyQt5.QtWidgets import QDialogButtonBox, QVBoxLayout, QLabel
-# from PyQt5.QtCore import QMutex, QTimer, QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal
 from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
-# from spec_checker.modules.speedtest.test_speed import check_speed
-# import soundcard
 import GPUtil
 import psutil
 import requests
 import platform
 import cv2
 from datetime import datetime
-# import spec_checker.modules.audio.audio as audio
-
-# import multiprocessing
 import sys
 if sys.platform.startswith('win32'):
     import pywifi
     import soundcard
-# import json
-
-# speedtest_results = {}
-# mutex = QMutex()
-
-# region speedtest
-# class SpeedtestWorker(QObject):
-#     finished = pyqtSignal()
-#     progress = pyqtSignal(int)
-#     updateResults = pyqtSignal()
-#
-#     def run(self):
-#         """Long-running task."""
-#         speed_results = check_speed()
-#         global speedtest_results
-#         mutex.lock()
-#         if speed_results:
-#             speedtest_results = speed_results
-#             # print(speedtest_results)
-#         else:
-#             speedtest_results = {
-#                 'download': 0,
-#                 'upload': 0,
-#                 'date': 0,
-#                 'time': 0,
-#                 'ping': 0,
-#                 'client': {},
-#                 'isp': "0",
-#                 'ip': "0",
-#                 'share': "0",
-#             }
-#         self.updateResults.emit()
-#         mutex.unlock()
-#         self.finished.emit()
-# endregion
 
 
 def get_size(num_bytes, suffix="B"):
@@ -106,34 +65,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def doExit(self):
         self.close()
 
-    # def runSpeedtest(self):
-    #     # Step 2: Create a QThread object
-    #     self.thread = QThread()
-    #     # Step 3: Create a worker object
-    #     self.worker = SpeedtestWorker()
-    #     # Step 4: Move worker to the thread
-    #     self.worker.moveToThread(self.thread)
-    #     # Step 5: Connect signals and slots
-    #     self.thread.started.connect(self.worker.run)
-    #     self.worker.updateResults.connect(self.updateSpeedResults)
-    #     self.worker.finished.connect(self.thread.quit)
-    #     self.worker.finished.connect(self.worker.deleteLater)
-    #     self.thread.finished.connect(self.thread.deleteLater)
-    #     # self.worker.progress.connect(self.reportProgress)
-    #     # Step 6: Start the thread
-    #     self.updateStatus("Starting Speedtest.....")
-    #     self.thread.start()
-    #
-    #     # Final resets
-    #     self.btnStart.setEnabled(False)
-    #     self.thread.finished.connect(lambda: self.btnStart.setEnabled(True))
-    #     self.thread.finished.connect(lambda: self.updateStatus("Complete\n"))
-    #     self.thread.finished.connect(lambda: self.progressBar.setValue(90))
-
-    # def updateSpeedResults(self):
-    #     global speedtest_results
-    #     self.updateStatus(".")
-
     def updateStatus(self, text):
         self.statusText = self.statusText + text
         self.txtStatus.setPlainText(self.statusText)
@@ -143,9 +74,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.txtStatus.setPlainText("")
 
     def runAllTests(self):
+        self.btnStart.setDisabled(True)
         self.clearStatus()
         # With config files, hook goes here!
-        # self.runSpeedtest()
         self.progressBar.setValue(0)
         self.updateStatus("Starting Audio Test......")
         if sys.platform.startswith('win32'):
@@ -193,7 +124,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print(self.webcamList)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(100)
-        self.updateStatus("All Tests Complete")
+        self.updateStatus("All Tests Complete!\n")
+        self.btnStart.setDisabled(False)
 
     def audio_test(self):
         sound_cards = soundcard.all_speakers()
@@ -401,7 +333,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == '__main__':
-    # multiprocessing.freeze_support()
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
     window = MainWindow()
     window.show()
