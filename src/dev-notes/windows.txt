@@ -1,0 +1,2 @@
+soundcard folder needs to be copied via base.json (should be windows.json)
+speedtest needs to be reimplemented

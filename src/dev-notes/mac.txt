@@ -1,0 +1,7 @@
+Issues:
+
+soundcard module is not macOS compatible and an alternative is needed.
+PyWiFi module is not macOS compatible and an alternative is needed.
+I have no idea how to test for antivirus in macOS
+installer complains about the verb 'internet-enabled' but still produces a .dmg
+the text boxes are not sized properly
