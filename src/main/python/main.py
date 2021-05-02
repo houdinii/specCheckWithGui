@@ -5,6 +5,7 @@ from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
 from spec_checker.modules.speedtest.test_speed import check_speed
 
+import multiprocessing
 import sys
 import json
 
@@ -100,6 +101,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
     window = MainWindow()
     window.show()
