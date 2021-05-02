@@ -1,0 +1,15 @@
+{
+    "app_name": "SpecChecker",
+    "author": "Houdinii",
+    "main_module": "src/main/python/main.py",
+    "version": "0.0.0",
+    "hidden_imports": [
+        "multiprocessing",
+        "multiprocessing.AuthenticationError",
+        "multiprocessing.BufferTooShort",
+        "multiprocessing.get_context",
+        "multiprocessing.TimeoutError",
+        "multiprocessing.get_start_method",
+        "multiprocessing.set_start_method"
+    ]
+}
