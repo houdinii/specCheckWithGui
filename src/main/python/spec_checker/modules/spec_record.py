@@ -1,3 +1,5 @@
+import os.path
+
 from spec_checker.modules.network import NetworkRecords
 from spec_checker.modules.sound import SoundRecord
 from spec_checker.modules.gpu import GpuRecords
@@ -8,7 +10,10 @@ from spec_checker.modules.memory import MemoryRecord
 from spec_checker.modules.system import SystemRecord
 from spec_checker.modules.webcam import WebcamRecords
 
+from PyQt5.QtWidgets import QFileDialog
+
 import sys
+from os.path import expanduser
 
 
 class SpecRecord:
@@ -42,8 +47,17 @@ class SpecRecord:
 
     def write_to_file(self, filename="results.txt"):
         try:
-            sys.stdout = open(filename, "w", encoding='utf8')
-            print(self)
-            sys.stdout.close()
+            user_dir = os.path.join(expanduser("~"), filename)
+            name = QFileDialog.getSaveFileName(
+                parent=None,
+                directory=user_dir,
+                caption='Save Results',
+                filter="Text Files (*.txt)",
+                initialFilter="Text Files (*.txt)"
+            )
+            file = open(name[0], 'w', encoding='utf8')
+            text = str(self)
+            file.write(text)
+            file.close()
         except Exception:
             print("Error has occurred when trying to write file")
