@@ -23,6 +23,22 @@ Netmask: {self.netmask}
 IP Address: {self.ip_address}"""
 
 
+def get_wifi_status(iface):
+    if iface.status() == pywifi.const.IFACE_CONNECTED:
+        status = "Connected"
+    elif iface.status() == pywifi.const.IFACE_DISCONNECTED:
+        status = "Disconnected"
+    elif iface.status() == pywifi.const.IFACE_INACTIVE:
+        status = "Inactive"
+    elif iface.status() == pywifi.const.IFACE_SCANNING:
+        status = "Scanning"
+    elif iface.status() == pywifi.const.IFACE_CONNECTING:
+        status = "Connecting"
+    else:
+        status = "Error"
+    return status
+
+
 class NetworkRecords:
     """
     A list of Network Records
@@ -75,21 +91,9 @@ IP Address: {self.list[0].ip_address}"""
         self.wifi_status = None
         if sys.platform.startswith('win32'):
             wifi = pywifi.PyWiFi()
-            iface = wifi.interfaces()[0]
-            self.wifi_status = self.get_wifi_status(iface)
+            if len(wifi.interfaces()) > 0:
+                iface = wifi.interfaces()[0]
+                self.wifi_status = get_wifi_status(iface)
+            else:
+                self.wifi_status = "No Wifi Adapters Found"
         return self
-
-    def get_wifi_status(self, iface):
-        if iface.status() == pywifi.const.IFACE_CONNECTED:
-            status = "Connected"
-        elif iface.status() == pywifi.const.IFACE_DISCONNECTED:
-            status = "Disconnected"
-        elif iface.status() == pywifi.const.IFACE_INACTIVE:
-            status = "Inactive"
-        elif iface.status() == pywifi.const.IFACE_SCANNING:
-            status = "Scanning"
-        elif iface.status() == pywifi.const.IFACE_CONNECTING:
-            status = "Connecting"
-        else:
-            status = "Error"
-        return status
