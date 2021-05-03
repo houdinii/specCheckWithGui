@@ -8,6 +8,8 @@ from spec_checker.modules.memory import MemoryRecord
 from spec_checker.modules.system import SystemRecord
 from spec_checker.modules.webcam import WebcamRecords
 
+import sys
+
 
 class SpecRecord:
     def __init__(self):
@@ -27,8 +29,7 @@ class SpecRecord:
         return "<SpecRecord>"
 
     def __str__(self):
-        return f"""
-Spec Checker Results:
+        return f"""Spec Checker Results:
 {self.sound}
 {self.gpus}
 {self.cpu}
@@ -38,3 +39,11 @@ Spec Checker Results:
 {self.network}
 {self.system}
 {self.webcams}"""
+
+    def write_to_file(self, filename="results.txt"):
+        try:
+            sys.stdout = open(filename, "w", encoding='utf8')
+            print(self)
+            sys.stdout.close()
+        except Exception:
+            print("Error has occurred when trying to write file")

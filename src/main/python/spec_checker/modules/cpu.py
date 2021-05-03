@@ -11,15 +11,6 @@ class CpuRecord:
         self.current_frequency = current_frequency
         self.total_usage = total_usage
 
-    def test(self):
-        self.physical_cores = psutil.cpu_count(logical=False)
-        self.total_cores = psutil.cpu_count(logical=True)
-        self.min_frequency = f"{psutil.cpu_freq().min:.2f}Mhz"
-        self.max_frequency = f"{psutil.cpu_freq().max:.2f}Mhz"
-        self.current_frequency = f"{psutil.cpu_freq().current:.2f}Mhz"
-        self.total_usage = f"{psutil.cpu_percent()}%"
-        return self
-
     def __repr__(self):
         return f"<CpuRecord physical_cores:{self.physical_cores} total_cores:{self.total_cores}>"
 
@@ -32,3 +23,12 @@ Minimum Frequency: {self.min_frequency}
 Maximum Frequency: {self.max_frequency}
 Current Frequency: {self.current_frequency}
 Total Usage Percent: {self.total_usage}"""
+
+    def test(self):
+        self.physical_cores = psutil.cpu_count(logical=False)
+        self.total_cores = psutil.cpu_count(logical=True)
+        self.min_frequency = f"{psutil.cpu_freq().min:.2f}Mhz"
+        self.max_frequency = f"{psutil.cpu_freq().max:.2f}Mhz"
+        self.current_frequency = f"{psutil.cpu_freq().current:.2f}Mhz"
+        self.total_usage = f"{psutil.cpu_percent()}%"
+        return self

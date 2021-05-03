@@ -35,6 +35,22 @@ class NetworkRecords:
             self.list = []
         self.wifi_status = wifi_status
 
+    def __repr__(self):
+        return f"<NetworkRecords total_records:{len(self.list)}>"
+
+    def __str__(self):
+        if len(self.list) > 0:
+            return f"""
+Wifi Connection Status: {self.wifi_status}
+
+First Network Connection Record:
+Interface Name: {self.list[0].interface_name}
+Address Family: {self.list[0].address_family}
+Netmask: {self.list[0].netmask}
+IP Address: {self.list[0].ip_address}"""
+        else:
+            return "No Network Connections Found!"
+
     def addRecord(self, network_record):
         if isinstance(network_record, NetworkRecord):
             self.list.append(network_record)
@@ -77,19 +93,3 @@ class NetworkRecords:
         else:
             status = "Error"
         return status
-
-    def __repr__(self):
-        return f"<NetworkRecords total_records:{len(self.list)}>"
-
-    def __str__(self):
-        if len(self.list) > 0:
-            return f"""
-Wifi Connection Status: {self.wifi_status}
-
-First Network Connection Record:
-Interface Name: {self.list[0].interface_name}
-Address Family: {self.list[0].address_family}
-Netmask: {self.list[0].netmask}
-IP Address: {self.list[0].ip_address}"""
-        else:
-            return "No Network Connections Found!"

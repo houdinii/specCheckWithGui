@@ -41,6 +41,24 @@ class HardDriveRecords:
         else:
             self.list = []
 
+    def __repr__(self):
+        return f"<HardDriveRecords total_records:{len(self.list)}>"
+
+    def __str__(self):
+        if len(self.list) > 0:
+            return f"""
+First Hard Drive Record:
+Device: {self.list[0].device}
+Mountpoint: {self.list[0].mountpoint}
+Filesystem: {self.list[0].filesystem}
+Usage: {self.list[0].usage}
+Total Size: {self.list[0].total_size}
+Used: {self.list[0].used}
+Free: {self.list[0].free}
+Percentage: {self.list[0].percentage}"""
+        else:
+            return "No Hard Drives Found!"
+
     def addRecord(self, hard_drive_record):
         if isinstance(hard_drive_record, HardDriveRecord):
             self.list.append(hard_drive_record)
@@ -69,21 +87,3 @@ class HardDriveRecords:
             )
             self.addRecord(device_object)
         return self
-
-    def __repr__(self):
-        return f"<HardDriveRecords total_records:{len(self.list)}>"
-
-    def __str__(self):
-        if len(self.list) > 0:
-            return f"""
-First Hard Drive Record:
-Device: {self.list[0].device}
-Mountpoint: {self.list[0].mountpoint}
-Filesystem: {self.list[0].filesystem}
-Usage: {self.list[0].usage}
-Total Size: {self.list[0].total_size}
-Used: {self.list[0].used}
-Free: {self.list[0].free}
-Percentage: {self.list[0].percentage}"""
-        else:
-            return "No Hard Drives Found!"

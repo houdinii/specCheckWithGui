@@ -1,3 +1,6 @@
+import sys
+
+
 def get_size(num_bytes, suffix="B"):
     """
     Scale bytes to its proper format

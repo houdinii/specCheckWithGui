@@ -27,6 +27,18 @@ class WebcamRecords:
         else:
             self.list = []
 
+    def __repr__(self):
+        return f"<WebcamRecords total_records:{len(self.list)}>"
+
+    def __str__(self):
+        if len(self.list) > 0:
+            return f"""
+First Webcam Record:
+Source: {self.list[0].source}
+Status: {self.list[0].status}"""
+        else:
+            return "No Webcams Found!"
+
     def addRecord(self, webcam_record):
         if isinstance(webcam_record, WebcamRecord):
             self.list.append(webcam_record)
@@ -50,17 +62,5 @@ class WebcamRecords:
         if len(self.list) == 0:
             self.addRecord(WebcamRecord(source=0, status=False))
         return self
-
-    def __repr__(self):
-        return f"<WebcamRecords total_records:{len(self.list)}>"
-
-    def __str__(self):
-        if len(self.list) > 0:
-            return f"""
-First Webcam Record:
-Source: {self.list[0].source}
-Status: {self.list[0].status}"""
-        else:
-            return "No Webcams Found!"
 
 

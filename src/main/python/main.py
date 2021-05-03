@@ -117,6 +117,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # print(self.specs.webcams.list[0])
         # print("")
         print(self.specs)
+        self.specs.write_to_file()
         self.updateStatus("Complete\n")
         self.progressBar.setValue(100)
         self.updateStatus("All Tests Complete!\n")
