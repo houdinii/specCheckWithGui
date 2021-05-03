@@ -1,34 +1,30 @@
-from json import JSONDecodeError
+# This must come first or it crashes when it tries to multi thread
+# from spec_checker.modules.network import NetworkRecord, NetworkRecords
+# from spec_checker.modules.location import LocationRecord
+# from spec_checker.modules.harddrive import HardDriveRecords
+# from spec_checker.modules.gpu import GpuRecord, GpuRecords
+# from spec_checker.modules.sound import SoundRecord
+# from spec_checker.modules.cpu import CpuRecord
+# from spec_checker.modules.memory import MemoryRecord
+# from spec_checker.modules.system import SystemRecord
+# from spec_checker.modules.webcam import WebcamRecord, WebcamRecords
+from spec_checker.modules.spec_record import SpecRecord
 
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtWidgets import QMainWindow, QDialog
-from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal
+from PyQt5.QtWidgets import QMainWindow, QDialog, QApplication, QStyle
+from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal, Qt
+from PyQt5.QtGui import QPalette, QColor
 from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
-import GPUtil
-import psutil
-import requests
-import platform
-import cv2
-from datetime import datetime
+
+# from spec_checker.modules.utilities import get_size
+# import GPUtil
+# import psutil
+# import requests
+# import platform
+# import cv2
+# from datetime import datetime
 import sys
-if sys.platform.startswith('win32'):
-    import pywifi
-    import soundcard
-
-
-def get_size(num_bytes, suffix="B"):
-    """
-    Scale bytes to its proper format
-    e.g:
-        1253656 => '1.20MB'
-        1253656678 => '1.17GB'
-    """
-    factor = 1024
-    for unit in ["", "K", "M", "G", "T", "P"]:
-        if num_bytes < factor:
-            return f"{num_bytes:.2f}{unit}{suffix}"
-        num_bytes /= factor
 
 
 class AboutBox(QDialog, Ui_AboutBox):
@@ -48,6 +44,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionExit.triggered.connect(self.doExit)
         self.actionAbout.triggered.connect(self.showAbout)
         self.statusText = ""
+        self.specs = SpecRecord()
+
         self.audioInfo = {}
         self.list_gpus = []
         self.cpuInfo = {}
@@ -80,260 +78,77 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(0)
         self.updateStatus("Starting Audio Test......")
         if sys.platform.startswith('win32'):
-            raw_audio_info = self.audio_test()
-        print(self.audioInfo)
+            self.specs.sound.test()
+        # print(f"default_sound_card: {self.specs.sound.default_sound_card}")
+        # print(f"sound_card_present: {self.specs.sound.sound_card_present}")
+        # print(f"default_mic: {self.specs.sound.default_mic}")
+        # print(f"mic_present: {self.specs.sound.mic_present}")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(11)
         self.updateStatus("Starting Video Test......")
-        raw_video_info = self.video_test()
-        print(self.list_gpus)
+        self.specs.gpus.test()
+        # print(self.specs.gpus.list[0].gpu_name)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(22)
         self.updateStatus("Starting CPU Test......")
-        raw_cpu_info = self.cpu_test()
-        print(self.cpuInfo)
+        self.specs.cpu.test()
+        # print(self.specs.cpu.total_cores)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(33)
         self.updateStatus("Starting Hard Drive Test......")
-        raw_hd_info = self.hard_drive_test()
-        print(self.hard_drive_list)
+        self.specs.harddrives.test()
+        # print(self.specs.harddrives.list[0].usage)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(44)
         self.updateStatus("Starting Location Test......")
-        raw_location_info = self.location_test()
-        print(self.locationInfo)
+        self.specs.location.test()
+        # print(self.specs.location.region)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(55)
         self.updateStatus("Starting Memory Test......")
-        raw_memory_info = self.memory_test()
-        print(self.memoryInfo)
+        self.specs.memory.test()
+        # print(self.specs.memory.available)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(66)
         self.updateStatus("Starting Network Test......")
-        raw_network_info = self.network_test()
-        print(self.networkInfo)
+        self.specs.network.test()
+        print(self.specs.network.list[0].ip_address)
+        print(self.specs.network.wifi_status)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(77)
         self.updateStatus("Starting General System Test......")
-        raw_system_info = self.system_test()
-        print(self.systemInfo)
+        self.specs.system.test()
+        # print(self.specs.system.computer_name)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(88)
         self.updateStatus("Starting Webcam Test (Light May Blink)......")
-        raw_webcam_list = self.webcam_test()
-        print(self.webcamList)
+        self.specs.webcams.test()
+        # print(self.specs.webcams.list)
         self.updateStatus("Complete\n")
         self.progressBar.setValue(100)
         self.updateStatus("All Tests Complete!\n")
         self.btnStart.setDisabled(False)
 
-    def audio_test(self):
-        sound_cards = soundcard.all_speakers()
-        mics = soundcard.all_microphones()
-
-        if len(sound_cards) > 0:
-            sound_card_present = True
-            default_sound_card = soundcard.default_speaker()
-        else:
-            sound_card_present = False
-            default_sound_card = "No default sound card found. May not be enabled or plugged in."
-
-        if len(mics) > 0:
-            mic_present = True
-            default_mic = soundcard.default_microphone()
-        else:
-            mic_present = False
-            default_mic = "No default mic found. May not be enabled or plugged in."
-
-        self.audioInfo = {
-            'sound_cards': sound_cards,
-            'sound_card_present': sound_card_present,
-            'default_sound_card': default_sound_card,
-            'mics': mics,
-            'mic_present': mic_present,
-            'default_mic': default_mic
-        }
-
-        return self.audioInfo
-
-    def video_test(self):
-        gpus = GPUtil.getGPUs()
-        self.list_gpus = []
-        for gpu in gpus:
-            video_object = {
-                'gpu_id': gpu.id,
-                'gpu_name': f"{gpu.name}",
-                'gpu_load': f"{gpu.load * 100}%",
-                'gpu_free_memory': f"{gpu.memoryFree}MB",
-                'gpu_used_memory': f"{gpu.memoryUsed}MB",
-                'gpu_total_memory': f"{gpu.memoryTotal}MB",
-                'gpu_temperature': f"{gpu.temperature} °C",
-            }
-
-            self.list_gpus.append(video_object)
-        return self.list_gpus
-
-    def cpu_test(self):
-        self.cpuInfo = {
-            'physical_cores': psutil.cpu_count(logical=False),
-            'total_cores': psutil.cpu_count(logical=True),
-            'min_frequency': f"{psutil.cpu_freq().min:.2f}Mhz",
-            'max_frequency': f"{psutil.cpu_freq().max:.2f}Mhz",
-            'current_frequency': f"{psutil.cpu_freq().current:.2f}Mhz",
-            'total_usage': f"{psutil.cpu_percent()}%"
-        }
-        return self.cpuInfo
-
-    def hard_drive_test(self):
-        disk_io = psutil.disk_io_counters()
-        partitions = psutil.disk_partitions()
-        self.hard_drive_list = []
-
-        for partition in partitions:
-            try:
-                partition_usage = psutil.disk_usage(partition.mountpoint)
-            except PermissionError:
-                partition_usage = "Disk Not Ready"
-                continue
-
-            device_object = {
-                'device': partition.device,
-                'mountpoint': partition.mountpoint,
-                'filesystem': partition.fstype,
-                'usage': partition_usage,
-                'total_size': get_size(partition_usage.total),
-                'used': get_size(partition_usage.used),
-                'free': get_size(partition_usage.free),
-                'percentage': f"{partition_usage.percent}%"
-            }
-            self.hard_drive_list.append(device_object)
-        return self.hard_drive_list
-
-    def location_test(self):
-        response = requests.get("https://ipinfo.io/")
-        response_json = {}
-        try:
-            response_json = response.json()
-        except JSONDecodeError as e:
-            response_json["ip"] = "Error with remote website. This is not an error with the client."
-            response_json["city"] = "Error with remote website. This is not an error with the client."
-            response_json["region"] = "Error with remote website. This is not an error with the client."
-            response_json["loc"] = "Error with remote website. This is not an error with the client."
-            response_json["org"] = "Error with remote website. This is not an error with the client."
-            response_json["timezone"] = "Error with remote website. This is not an error with the client."
-
-        self.locationInfo = {
-            'ip': str(response_json['ip']),
-            'city': str(response_json['city']),
-            'region': str(response_json['region']),
-            'loc': str(response_json['loc']),
-            'org': str(response_json['org']),
-            'timezone': str(response_json['timezone']),
-        }
-        return self.locationInfo
-
-    def memory_test(self):
-        uname = platform.uname()
-        svmem = psutil.virtual_memory()
-        swap = psutil.swap_memory()
-
-        self.memoryInfo = {
-            'total': f"{get_size(svmem.total)}",
-            'available': f"{get_size(svmem.available)}",
-            'used': f"{get_size(svmem.used)}",
-            'percentage': f"{svmem.percent}%",
-        }
-        return self.memoryInfo
-
-    def network_test(self):
-        disk_io = psutil.disk_io_counters()
-        partitions = psutil.disk_partitions()
-        network_list = []
-
-        if_addrs = psutil.net_if_addrs()
-
-        for interface_name, interface_addresses in if_addrs.items():
-            for address in interface_addresses:
-                if str(address.family) != 'AddressFamily.AF_LINK' and 'Loopback' not in str(interface_name):
-                    network_object = {
-                        'interface_name': str(interface_name),
-                        'address_family': str(address.family),
-                        'netmask': str(address.netmask),
-                        'ip_address': str(address.address)
-                    }
-                    network_list.append(network_object)
-        wifi_status = {}
-        if sys.platform.startswith('win32'):
-            wifi = pywifi.PyWiFi()
-            iface = wifi.interfaces()[0]
-            wifi_status = self.get_wifi_status(iface)
-        self.networkInfo = {
-            'network_list': network_list,
-            'wifi_status': wifi_status
-        }
-        return self.networkInfo
-
-    def get_wifi_status(self, iface):
-        if iface.status() == pywifi.const.IFACE_CONNECTED:
-            status = "Connected"
-        elif iface.status() == pywifi.const.IFACE_DISCONNECTED:
-            status = "Disconnected"
-        elif iface.status() == pywifi.const.IFACE_INACTIVE:
-            status = "Inactive"
-        elif iface.status() == pywifi.const.IFACE_SCANNING:
-            status = "Scanning"
-        elif iface.status() == pywifi.const.IFACE_CONNECTING:
-            status = "Connecting"
-        else:
-            status = "Error"
-        return status
-
-    def system_test(self):
-        uname = platform.uname()
-        boot_time = datetime.fromtimestamp(psutil.boot_time())
-
-        formatted_b_time = f"{boot_time.month}/{boot_time.day}/{boot_time.year}"\
-                           + f"{boot_time.hour}:{boot_time.minute}:{boot_time.second}"
-        self.systemInfo = {
-            'system_type': uname.system,
-            'computer_name': uname.node,
-            'os_release': uname.release,
-            'os_version': uname.version,
-            'machine_type': uname.machine,
-            'processor_family': uname.processor,
-            'boot_time_timestamp': boot_time,
-            'boot_time_formatted': formatted_b_time
-        }
-        return self.systemInfo
-
-    def webcam_test(self):
-        webcam_list = []
-        count = 0
-
-        while True:
-            cap = cv2.VideoCapture(count)
-            if cap is None or not cap.isOpened():
-                if count > 10:
-                    break
-            else:
-                webcam_list.append({
-                    "source": count + 1,
-                    "status": True
-                })
-            count += 1
-
-        if len(webcam_list) == 0:
-            webcam_list.append({
-                "source": 0,
-                "status": False
-            })
-
-        self.webcamList = webcam_list
-        return self.webcamList
-
 
 if __name__ == '__main__':
-    appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
+    app = QApplication(sys.argv)
+    app.setStyle("Fusion")
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    palette.setColor(QPalette.WindowText, Qt.white)
+    palette.setColor(QPalette.Base, QColor(25, 25, 25))
+    palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+    palette.setColor(QPalette.ToolTipBase, Qt.black)
+    palette.setColor(QPalette.ToolTipText, Qt.white)
+    palette.setColor(QPalette.Text, Qt.white)
+    palette.setColor(QPalette.Button, QColor(53, 53, 53))
+    palette.setColor(QPalette.ButtonText, Qt.white)
+    palette.setColor(QPalette.BrightText, Qt.red)
+    palette.setColor(QPalette.Link, QColor(42, 130, 218))
+    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    palette.setColor(QPalette.HighlightedText, Qt.black)
+    app.setPalette(palette)
+    appctxt = ApplicationContext()  # 1. Instantiate ApplicationContext
     window = MainWindow()
     window.show()
     exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
