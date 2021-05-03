@@ -31,3 +31,18 @@ class SystemRecord:
         self.boot_time_timestamp = boot_time
         self.boot_time_formatted = formatted_b_time
         return self
+
+    def __repr__(self):
+        return f"<SystemRecord system_type:{self.system_type} computer_name:{self.computer_name} os_release:{self.os_release}>"
+
+    def __str__(self):
+        return f"""
+System Information:
+System Type: {self.system_type}
+Computer Name: {self.computer_name}
+OS Release: {self.os_release}
+OS Version: {self.os_version}
+Machine Type: {self.machine_type}
+Processor Family: {self.processor_family}
+Boot Time Timestamp: {self.boot_time_timestamp}
+Boot Time Formatted: {self.boot_time_formatted}"""

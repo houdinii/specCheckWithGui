@@ -11,6 +11,17 @@ class NetworkRecord:
         self.netmask = netmask
         self.ip_address = ip_address
 
+    def __repr__(self):
+        return f"<NetworkRecord interface_name:{self.interface_name} ip_address:{self.ip_address}>"
+
+    def __str__(self):
+        return f"""
+Network Connection Information:
+Interface Name: {self.interface_name}
+Address Family: {self.address_family}
+Netmask: {self.netmask}
+IP Address: {self.ip_address}"""
+
 
 class NetworkRecords:
     """
@@ -66,3 +77,19 @@ class NetworkRecords:
         else:
             status = "Error"
         return status
+
+    def __repr__(self):
+        return f"<NetworkRecords total_records:{len(self.list)}>"
+
+    def __str__(self):
+        if len(self.list) > 0:
+            return f"""
+Wifi Connection Status: {self.wifi_status}
+
+First Network Connection Record:
+Interface Name: {self.list[0].interface_name}
+Address Family: {self.list[0].address_family}
+Netmask: {self.list[0].netmask}
+IP Address: {self.list[0].ip_address}"""
+        else:
+            return "No Network Connections Found!"

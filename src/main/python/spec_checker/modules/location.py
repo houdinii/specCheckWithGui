@@ -31,3 +31,16 @@ class LocationRecord:
         self.org = str(response_json['org'])
         self.timezone = str(response_json['timezone'])
         return self
+
+    def __repr__(self):
+        return f"<LocationRecord city:{self.city} region:{self.region}>"
+
+    def __str__(self):
+        return f"""
+Location Information:
+Ip: {self.ip}
+City: {self.city}
+Region: {self.region}
+Loc: {self.loc}
+Org Size: {self.org}
+Timezone: {self.timezone}"""

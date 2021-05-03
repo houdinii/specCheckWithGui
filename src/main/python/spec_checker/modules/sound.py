@@ -31,3 +31,14 @@ class SoundRecord:
             self.mic_present = False
             self.default_mic = "No default mic found. May not be enabled or plugged in."
         return self
+
+    def __repr__(self):
+        return f"<SoundRecord sound_card_present:{self.sound_card_present} mic_present: {self.mic_present}>"
+
+    def __str__(self):
+        return f"""
+Sound Information:
+Sound Card Present: {self.sound_card_present}
+Default Sound Card: {self.default_sound_card}
+Mic Present: {self.mic_present}
+Default Mic: {self.default_mic}"""

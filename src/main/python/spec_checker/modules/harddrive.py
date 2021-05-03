@@ -14,6 +14,21 @@ class HardDriveRecord:
         self.free = free
         self.percentage = percentage
 
+    def __repr__(self):
+        return f"<HardDriveRecord device:{self.device} mountpoint:{self.mountpoint}>"
+
+    def __str__(self):
+        return f"""
+Hard Drive Information:
+Device: {self.device}
+Mountpoint: {self.mountpoint}
+Filesystem: {self.filesystem}
+Usage: {self.usage}
+Total Size: {self.total_size}
+Used: {self.used}
+Free: {self.free}
+Percentage: {self.percentage}"""
+
 
 class HardDriveRecords:
     """
@@ -54,3 +69,21 @@ class HardDriveRecords:
             )
             self.addRecord(device_object)
         return self
+
+    def __repr__(self):
+        return f"<HardDriveRecords total_records:{len(self.list)}>"
+
+    def __str__(self):
+        if len(self.list) > 0:
+            return f"""
+First Hard Drive Record:
+Device: {self.list[0].device}
+Mountpoint: {self.list[0].mountpoint}
+Filesystem: {self.list[0].filesystem}
+Usage: {self.list[0].usage}
+Total Size: {self.list[0].total_size}
+Used: {self.list[0].used}
+Free: {self.list[0].free}
+Percentage: {self.list[0].percentage}"""
+        else:
+            return "No Hard Drives Found!"

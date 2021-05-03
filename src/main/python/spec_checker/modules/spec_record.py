@@ -22,3 +22,19 @@ class SpecRecord:
         self.network = NetworkRecords()
         self.system = SystemRecord()
         self.webcams = WebcamRecords()
+
+    def __repr__(self):
+        return "<SpecRecord>"
+
+    def __str__(self):
+        return f"""
+Spec Checker Results:
+{self.sound}
+{self.gpus}
+{self.cpu}
+{self.harddrives}
+{self.location}
+{self.memory}
+{self.network}
+{self.system}
+{self.webcams}"""

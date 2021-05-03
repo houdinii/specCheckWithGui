@@ -20,3 +20,14 @@ class MemoryRecord:
         self.used = f"{get_size(svmem.used)}"
         self.percentage = f"{svmem.percent}%"
         return self
+
+    def __repr__(self):
+        return f"<MemoryRecord total:{self.city} used: {self.used} available: {self.available} percentage:{self.region}>"
+
+    def __str__(self):
+        return f"""
+Location Information:
+Total: {self.total}
+Available: {self.available}
+Used: {self.used}
+Percentage: {self.percentage}"""
