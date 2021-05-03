@@ -71,7 +71,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(11)
         self.updateStatus("Starting Video Test......")
         self.specs.gpus.test()
-        print(self.specs.gpus.list[0].gpu_name)
+        if len(self.specs.gpus.list) > 0:
+            print(self.specs.gpus.list[0].gpu_name)
         self.updateStatus("Complete\n")
         print("")
         self.progressBar.setValue(22)

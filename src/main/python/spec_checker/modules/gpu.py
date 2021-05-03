@@ -1,4 +1,6 @@
-import GPUtil
+import sys
+if sys.platform.startswith('win32'):
+    import GPUtil
 
 
 class GpuRecord:
@@ -32,17 +34,18 @@ class GpuRecords:
             self.list.append(gpu_record)
 
     def test(self):
-        gpus = GPUtil.getGPUs()
-        self.gpu_record_list = []
-        for gpu in gpus:
-            gpu_record = GpuRecord(
-                gpu_id=gpu.id,
-                gpu_name=f"{gpu.name}",
-                gpu_load=f"{gpu.load * 100}%",
-                gpu_free_memory=f"{gpu.memoryFree}MB",
-                gpu_used_memory=f"{gpu.memoryUsed}MB",
-                gpu_total_memory=f"{gpu.memoryTotal}MB",
-                gpu_temperature="{gpu.temperature} °C")
+        if sys.platform.startswith('win32'):
+            gpus = GPUtil.getGPUs()
+            self.gpu_record_list = []
+            for gpu in gpus:
+                gpu_record = GpuRecord(
+                    gpu_id=gpu.id,
+                    gpu_name=f"{gpu.name}",
+                    gpu_load=f"{gpu.load * 100}%",
+                    gpu_free_memory=f"{gpu.memoryFree}MB",
+                    gpu_used_memory=f"{gpu.memoryUsed}MB",
+                    gpu_total_memory=f"{gpu.memoryTotal}MB",
+                    gpu_temperature="{gpu.temperature} °C")
 
-            self.list.append(gpu_record)
-        return self
+                self.list.append(gpu_record)
+            return self
