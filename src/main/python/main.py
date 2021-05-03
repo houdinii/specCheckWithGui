@@ -1,13 +1,4 @@
 # This must come first or it crashes when it tries to multi thread
-# from spec_checker.modules.network import NetworkRecord, NetworkRecords
-# from spec_checker.modules.location import LocationRecord
-# from spec_checker.modules.harddrive import HardDriveRecords
-# from spec_checker.modules.gpu import GpuRecord, GpuRecords
-# from spec_checker.modules.sound import SoundRecord
-# from spec_checker.modules.cpu import CpuRecord
-# from spec_checker.modules.memory import MemoryRecord
-# from spec_checker.modules.system import SystemRecord
-# from spec_checker.modules.webcam import WebcamRecord, WebcamRecords
 from spec_checker.modules.spec_record import SpecRecord
 
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
@@ -17,13 +8,6 @@ from PyQt5.QtGui import QPalette, QColor
 from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
 
-# from spec_checker.modules.utilities import get_size
-# import GPUtil
-# import psutil
-# import requests
-# import platform
-# import cv2
-# from datetime import datetime
 import sys
 
 
@@ -33,7 +17,6 @@ class AboutBox(QDialog, Ui_AboutBox):
         self.setupUi(self)
 
 
-# noinspection PyMethodMayBeStatic
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -79,51 +62,60 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.updateStatus("Starting Audio Test......")
         if sys.platform.startswith('win32'):
             self.specs.sound.test()
-        # print(f"default_sound_card: {self.specs.sound.default_sound_card}")
-        # print(f"sound_card_present: {self.specs.sound.sound_card_present}")
-        # print(f"default_mic: {self.specs.sound.default_mic}")
-        # print(f"mic_present: {self.specs.sound.mic_present}")
+        print(f"default_sound_card: {self.specs.sound.default_sound_card}")
+        print(f"sound_card_present: {self.specs.sound.sound_card_present}")
+        print(f"default_mic: {self.specs.sound.default_mic}")
+        print(f"mic_present: {self.specs.sound.mic_present}")
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(11)
         self.updateStatus("Starting Video Test......")
         self.specs.gpus.test()
-        # print(self.specs.gpus.list[0].gpu_name)
+        print(self.specs.gpus.list[0].gpu_name)
         self.updateStatus("Complete\n")
+        print("")
         self.progressBar.setValue(22)
         self.updateStatus("Starting CPU Test......")
         self.specs.cpu.test()
-        # print(self.specs.cpu.total_cores)
+        print(self.specs.cpu.total_cores)
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(33)
         self.updateStatus("Starting Hard Drive Test......")
         self.specs.harddrives.test()
-        # print(self.specs.harddrives.list[0].usage)
+        print(self.specs.harddrives.list[0].usage)
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(44)
         self.updateStatus("Starting Location Test......")
         self.specs.location.test()
-        # print(self.specs.location.region)
+        print(self.specs.location.region)
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(55)
         self.updateStatus("Starting Memory Test......")
         self.specs.memory.test()
-        # print(self.specs.memory.available)
+        print(self.specs.memory.available)
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(66)
         self.updateStatus("Starting Network Test......")
         self.specs.network.test()
         print(self.specs.network.list[0].ip_address)
         print(self.specs.network.wifi_status)
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(77)
         self.updateStatus("Starting General System Test......")
         self.specs.system.test()
-        # print(self.specs.system.computer_name)
+        print(self.specs.system.computer_name)
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(88)
         self.updateStatus("Starting Webcam Test (Light May Blink)......")
         self.specs.webcams.test()
-        # print(self.specs.webcams.list)
+        print(self.specs.webcams.list)
+        print("")
         self.updateStatus("Complete\n")
         self.progressBar.setValue(100)
         self.updateStatus("All Tests Complete!\n")
