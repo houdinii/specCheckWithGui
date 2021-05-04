@@ -107,7 +107,7 @@ async def progress(future):
 
 async def cleanup():
     await gather(*[s.close() for s in sessions])
-    print()
+    # print()
 
 
 # def dot():

@@ -74,6 +74,9 @@ Percentage: {self.list[0].percentage}"""
             except PermissionError:
                 partition_usage = "Disk Not Ready"
                 continue
+            except OSError:
+                partition_usage = "Disk not ready"
+                continue
 
             device_object = HardDriveRecord(
                 device=partition.device,
