@@ -3,3 +3,8 @@ connecting to sheets needs to be implemented
 check other location providers before settling on this one
 create a results file that is encoded
 transmit-results window
+
+error checks
+tests
+warning pop
+submit results confirmation?

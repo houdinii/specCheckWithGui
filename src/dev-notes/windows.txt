@@ -1,4 +1,3 @@
-soundcard folder needs to be copied via base.json (should be windows.json)
 speedtest needs to be reimplemented
 
 Needs antivirus, speedtest upload and ping, OS registration info
@@ -15,3 +14,6 @@ Instead, I'm going to have to build a browser window, generate html with a butto
 >>> webbrowser.open('/home/david/index.html')
 True
 >>>
+
+Speed Test Upload and Ping Should Function
+It's using fast.com to get dl speed, but we still need to find a way to get the ul speed and ping.
