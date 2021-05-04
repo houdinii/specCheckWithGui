@@ -4,6 +4,8 @@ import asyncio
 from spec_checker.modules.spec_record import SpecRecord
 from spec_checker.modules.utilities import truncate
 
+from spec_checker.modules.submit_to_google_forms import google_submit
+
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import QMainWindow, QDialog, QApplication, QStyle
 from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal, Qt
@@ -115,7 +117,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.progressBar.setValue(90)
         self.updateStatus("Starting Speedtest......")
-        # self.specs.speedtest.test()
         loop = asyncio.new_event_loop()
         fut = loop.create_future()
         asyncio.set_event_loop(loop)
@@ -123,11 +124,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.specs.speedtest.download_speed = speed_result['download_speed']
         self.specs.speedtest.upload_speed = speed_result['upload_speed']
         self.specs.speedtest.ping = speed_result['ping']
-        print(f"Speed Result: {self.specs.speedtest.download_speed} {self.specs.speedtest.upload_speed} {self.specs.speedtest.ping}")
         self.updateStatus("Complete\n")
 
-        print(self.specs)
         self.progressBar.setValue(100)
+        google_submit(self.specs)
         self.specs.write_to_file()
         self.updateStatus("All Tests Complete!\n")
         self.btnStart.setDisabled(False)

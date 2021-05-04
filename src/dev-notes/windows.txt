@@ -1,7 +1,17 @@
 soundcard folder needs to be copied via base.json (should be windows.json)
 speedtest needs to be reimplemented
 
+Needs antivirus, speedtest upload and ping, OS registration info
+
 
 Error related to GoogleFS:
 OSError: [WinError 1] Incorrect function: E caught exception leads to console output:
 [12440:NonCelloThread] registry_win.h:62:GetProtoFromRegistryValue Getting length of binary registry key Software\Google\DriveFS\Share failed with 0x2
+
+Joes work is behind a login so I can't just post to it like normal
+Instead, I'm going to have to build a browser window, generate html with a button, and post it that way so a login screen pops up.
+
+>>> import webbrowser
+>>> webbrowser.open('/home/david/index.html')
+True
+>>>
