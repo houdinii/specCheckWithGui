@@ -9,7 +9,7 @@ from spec_checker.modules.location import LocationRecord
 from spec_checker.modules.memory import MemoryRecord
 from spec_checker.modules.system import SystemRecord
 from spec_checker.modules.webcam import WebcamRecords
-
+from spec_checker.modules.speedtest import SpeedtestRecord
 from PyQt5.QtWidgets import QFileDialog
 
 import sys
@@ -29,6 +29,7 @@ class SpecRecord:
         self.network = NetworkRecords()
         self.system = SystemRecord()
         self.webcams = WebcamRecords()
+        self.speedtest = SpeedtestRecord()
 
     def __repr__(self):
         return "<SpecRecord>"
@@ -43,7 +44,8 @@ class SpecRecord:
 {self.memory}
 {self.network}
 {self.system}
-{self.webcams}"""
+{self.webcams}
+{self.speedtest}"""
 
     def write_to_file(self, filename="results.txt"):
         try:

@@ -1,5 +1,8 @@
 # This must come first or it crashes when it tries to multi thread
+import asyncio
+
 from spec_checker.modules.spec_record import SpecRecord
+from spec_checker.modules.utilities import truncate
 
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import QMainWindow, QDialog, QApplication, QStyle
@@ -8,7 +11,11 @@ from PyQt5.QtGui import QPalette, QColor
 from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
 
+
 import sys
+import time
+
+from spec_checker.modules.speedtest import speed_test
 
 
 class AboutBox(QDialog, Ui_AboutBox):
@@ -55,71 +62,73 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.txtStatus.setPlainText("")
 
     def runAllTests(self):
+
         self.btnStart.setDisabled(True)
         self.clearStatus()
         # With config files, hook goes here!
+
         self.progressBar.setValue(0)
         self.updateStatus("Starting Audio Test......")
         if sys.platform.startswith('win32'):
             self.specs.sound.test()
-        # print(self.specs.sound)
         self.updateStatus("Complete\n")
-        self.progressBar.setValue(11)
+
+        self.progressBar.setValue(10)
         self.updateStatus("Starting Video Test......")
         self.specs.gpus.test()
-        # print(self.specs.gpus)
-        # print(self.specs.gpus.list[0])
         self.updateStatus("Complete\n")
-        # print("")
-        self.progressBar.setValue(22)
+
+        self.progressBar.setValue(20)
         self.updateStatus("Starting CPU Test......")
         self.specs.cpu.test()
-        # print(self.specs.cpu)
-        # print("")
         self.updateStatus("Complete\n")
-        self.progressBar.setValue(33)
+
+        self.progressBar.setValue(30)
         self.updateStatus("Starting Hard Drive Test......")
         self.specs.harddrives.test()
-        # print(self.specs.harddrives)
-        # print(self.specs.harddrives.list[0])
-        # print("")
         self.updateStatus("Complete\n")
-        self.progressBar.setValue(44)
+
+        self.progressBar.setValue(40)
         self.updateStatus("Starting Location Test......")
         self.specs.location.test()
-        # print(self.specs.location)
-        # print("")
         self.updateStatus("Complete\n")
-        self.progressBar.setValue(55)
+
+        self.progressBar.setValue(50)
         self.updateStatus("Starting Memory Test......")
         self.specs.memory.test()
-        # print(self.specs.memory)
-        # print("")
         self.updateStatus("Complete\n")
-        self.progressBar.setValue(66)
+
+        self.progressBar.setValue(60)
         self.updateStatus("Starting Network Test......")
         self.specs.network.test()
-        # print(self.specs.network.list[0])
-        # print(self.specs.network)
-        # print(self.specs.network.wifi_status)
-        # print("")
         self.updateStatus("Complete\n")
-        self.progressBar.setValue(77)
+
+        self.progressBar.setValue(70)
         self.updateStatus("Starting General System Test......")
         self.specs.system.test()
-        # print(self.specs.system)
-        # print("")
         self.updateStatus("Complete\n")
-        self.progressBar.setValue(88)
+
+        self.progressBar.setValue(80)
         self.updateStatus("Starting Webcam Test (Light May Blink)......")
         self.specs.webcams.test()
-        # print(self.specs.webcams)
-        # print(self.specs.webcams.list[0])
-        # print("")
-        print(self.specs)
-        self.specs.write_to_file()
         self.updateStatus("Complete\n")
+
+        self.progressBar.setValue(90)
+        self.updateStatus("Starting Speedtest......")
+        # self.specs.speedtest.test()
+        loop = asyncio.new_event_loop()
+        fut = loop.create_future()
+        asyncio.set_event_loop(loop)
+        speed_result = loop.run_until_complete(speed_test(fut))
+        self.specs.speedtest.download_speed = speed_result['download_speed']
+        self.specs.speedtest.upload_speed = speed_result['upload_speed']
+        self.specs.speedtest.ping = speed_result['ping']
+        print(f"Speed Result: {self.specs.speedtest.download_speed} {self.specs.speedtest.upload_speed} {self.specs.speedtest.ping}")
+        self.updateStatus("Complete\n")
+
+        print(self.specs)
         self.progressBar.setValue(100)
+        self.specs.write_to_file()
         self.updateStatus("All Tests Complete!\n")
         self.btnStart.setDisabled(False)
 
