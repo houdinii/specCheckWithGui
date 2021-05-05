@@ -3,32 +3,50 @@ import asyncio
 
 from spec_checker.modules.spec_record import SpecRecord
 from spec_checker.modules.utilities import truncate
-
 from spec_checker.modules.submit_to_google_forms import google_submit
-
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtWidgets import QMainWindow, QDialog, QApplication, QStyle
-from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal, Qt
-from PyQt5.QtGui import QPalette, QColor
 from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
 
+from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
+from PyQt5.QtWidgets import QMainWindow, QDialog, QApplication, QStyle
+from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal, Qt
+from PyQt5.QtGui import QPalette, QColor
+
+from os import path
+import os
 import sys
 import time
+import configparser
+import pdoc
+import logging
 
 from spec_checker.modules.speedtest import speed_test
 
 
 class AboutBox(QDialog, Ui_AboutBox):
+    """QT dialog box with version and author information"""
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
+    """QT main window"""
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+
+        # Logging
+        self.log = logging.getLogger("SpecChecker Main")
+        self.log.setLevel("INFO")
+        self.log.info("Starting Main Application")
+
+        # Configuration
+        self.config = configparser.ConfigParser()
+        self.load_configuration()
+        self.load_logging_configuration()
+
+        # GUI Code
         self.setupUi(self)
         self.progressBar.setValue(0)
         self.btnStart.pressed.connect(self.runAllTests)
@@ -36,8 +54,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionExit.triggered.connect(self.doExit)
         self.actionAbout.triggered.connect(self.showAbout)
         self.statusText = ""
-        self.specs = SpecRecord()
 
+        # Specifications Code
+        self.specs = SpecRecord()
         self.audioInfo = {}
         self.list_gpus = []
         self.cpuInfo = {}
@@ -49,21 +68,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.webcamList = []
 
     def showAbout(self):
+        """Show the about box"""
         dlg = AboutBox()
         dlg.exec_()
 
     def doExit(self):
+        """Exit the program cleanly"""
+        self.log.info("Closing Application")
         self.close()
 
     def updateStatus(self, text):
+        """Update the status text in the main text area of the app"""
         self.statusText = self.statusText + text
         self.txtStatus.setPlainText(self.statusText)
 
     def clearStatus(self):
+        """Clear the status text in the main text area of the app"""
         self.statusText = ""
         self.txtStatus.setPlainText("")
 
     def runAllTests(self):
+        """Performs the tests as outlined by configuration"""
 
         self.btnStart.setDisabled(True)
         self.clearStatus()
@@ -131,6 +156,79 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.specs.write_to_file()
         self.updateStatus("All Tests Complete!\n")
         self.btnStart.setDisabled(False)
+
+    def load_configuration(self, filename='config.ini'):
+        """Check if a configuration file exists. If it does, load it
+        If not, load the default"""
+        if path.exists(filename):
+            self.config.read(filename)
+            self.log.info(f"Loaded Configuration: {filename}")
+        else:
+            self.load_default_configuration()
+            self.log.info("Configuration File Does Not Exist. Loading Defaults.")
+
+    def load_default_configuration(self):
+        """Load built in default configuration"""
+        default_config = """
+        [general]
+        # Comment out lines that are unnecessary with hash
+        save to file = False
+        debug = True
+        # Debug Levels: CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET (NOTSET turns off logging)
+        debug level = INFO
+
+        [email_submission]
+        enabled = False
+        fields json = fields.json
+        # Not Yet Implemented
+        
+        [google_submission]
+        enabled = False
+        pre url = https://docs.google.com/forms/d/e/
+        form id = ***REMOVED***
+        post url = /formResponse
+        full url = ${pre url}${form id}${post url}
+        fields json = fields.json
+        
+        [cpu]
+        enabled = True
+         
+        [gpu]
+        enabled = True
+         
+        [harddrive]
+        enabled = True
+        
+        [location]
+        enabled = True
+        # options: ipinfo, 
+        provider = ipinfo
+        
+        [memory]
+        enabled = True
+        
+        [network]
+        enabled = True
+        
+        [sound]
+        enabled = True
+        
+        [speedtest]
+        # options: fast, 
+        provider = fast
+        
+        [system]
+        enabled = True
+        """
+        self.config.read_string(default_config)
+        self.log.info("Loaded Default Configuration")
+
+    def load_logging_configuration(self):
+        """Sets Application Wide Log Level From Configuration"""
+        log_flag = bool(self.config.get('general', 'debug'))
+        log_level = self.config.get('general', 'debug level')
+        if log_flag is False:
+            log_level = "NOTSET"
 
 
 if __name__ == '__main__':
