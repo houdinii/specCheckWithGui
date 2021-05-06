@@ -3,6 +3,19 @@ from spec_checker.modules.utilities import get_size
 
 
 class HardDriveRecord:
+    """
+    Holds information about the hard drives installed in the client machine.
+
+    Keyword Arguments:
+        device      -- Device description (Default: None)
+        mountpoint  -- Device mountpoint (Default: None)
+        filesystem  -- Device filesystem (Default: None)
+        usage       -- Device usage raw information (Default: None)
+        total_size  -- Total size of the device (Default: None)
+        used        -- Amount of space used on the device (Default: None)
+        free        -- Free space available on the device (Default: None)
+        percentage  -- Percent used on the device (Default: None) fixme: Check if it should be free?
+    """
     def __init__(self, device=None, mountpoint=None, filesystem=None, usage=None,
                  total_size=None, used=None, free=None, percentage=None):
         self.device = device
@@ -32,7 +45,9 @@ Percentage: {self.percentage}"""
 
 class HardDriveRecords:
     """
-    A list of Hard Drive Records
+    Holds and records a list of <HardDriveRecord> based on the specs of the current machine
+
+    Returns: A <HardDriveRecords> object containing zero or more <HardDriveRecord> objects.
     """
     def __init__(self, hard_drive_record_list=None):
         # Check if all list items are HardDriveRecord and if so, add them to self.
@@ -60,13 +75,19 @@ Percentage: {self.list[0].percentage}"""
             return "No Hard Drives Found!"
 
     def addRecord(self, hard_drive_record):
+        """Adds a <HardDriveRecord> to <HardDriveRecords> list"""
         if isinstance(hard_drive_record, HardDriveRecord):
             self.list.append(hard_drive_record)
 
     def test(self):
+        """
+        Performs the HardDrive test and records record to self
+
+        Returns: <HardDriveRecord>
+        """
         disk_io = psutil.disk_io_counters()
         partitions = psutil.disk_partitions()
-        self.hard_drive_record_list = []
+        self.list = []
 
         for partition in partitions:
             try:

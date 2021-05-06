@@ -5,6 +5,19 @@ if sys.platform.startswith('win32'):
 
 
 class NetworkRecord:
+    """
+    Holds information about the hard drives installed in the client machine.
+
+    Keyword Arguments:
+        device      -- Device description (Default: None)
+        mountpoint  -- Device mountpoint (Default: None)
+        filesystem  -- Device filesystem (Default: None)
+        usage       -- Device usage raw information (Default: None)
+        total_size  -- Total size of the device (Default: None)
+        used        -- Amount of space used on the device (Default: None)
+        free        -- Free space available on the device (Default: None)
+        percentage  -- Percent used on the device (Default: None) fixme: Check if it should be free?
+    """
     def __init__(self, interface_name=None, address_family=None, netmask=None, ip_address=None):
         self.interface_name = interface_name
         self.address_family = address_family
@@ -24,15 +37,24 @@ IP Address: {self.ip_address}"""
 
 
 def get_wifi_status(iface):
-    if iface.status() == pywifi.const.IFACE_CONNECTED:
+    """
+    Retrieves a descriptive status of the client's wifi connection. Windows specific!
+
+    Keyword Arguments:
+        iface   -- pywifi interface object
+
+    Returns: status  -- Current status of wifi as a descriptive string
+    """
+    raw_status = iface.status()
+    if raw_status == pywifi.const.IFACE_CONNECTED:
         status = "Connected"
-    elif iface.status() == pywifi.const.IFACE_DISCONNECTED:
+    elif raw_status == pywifi.const.IFACE_DISCONNECTED:
         status = "Disconnected"
-    elif iface.status() == pywifi.const.IFACE_INACTIVE:
+    elif raw_status == pywifi.const.IFACE_INACTIVE:
         status = "Inactive"
-    elif iface.status() == pywifi.const.IFACE_SCANNING:
+    elif raw_status == pywifi.const.IFACE_SCANNING:
         status = "Scanning"
-    elif iface.status() == pywifi.const.IFACE_CONNECTING:
+    elif raw_status == pywifi.const.IFACE_CONNECTING:
         status = "Connecting"
     else:
         status = "Error"
@@ -41,7 +63,13 @@ def get_wifi_status(iface):
 
 class NetworkRecords:
     """
-    A list of Network Records
+    Holds and records a list of <NetworkRecord> based on the specs of the current machine
+
+    Keyword Arguments:
+        network_record_list -- List of <NetworkRecord> objects (Default: None)
+        wifi_status         -- Boolean Status of wifi connection (Default: False)
+
+    Returns: A <NetworkRecords> object containing zero or more <NetworkRecord> objects.
     """
     def __init__(self, network_record_list=None, wifi_status=False):
         # Check if all list items are GpuRecord and if so, add them to self.
@@ -68,10 +96,15 @@ IP Address: {self.list[0].ip_address}"""
             return "No Network Connections Found!"
 
     def addRecord(self, network_record):
+        """Adds a <NetworkRecord> to <NetworkRecords> list"""
         if isinstance(network_record, NetworkRecord):
             self.list.append(network_record)
 
     def test(self):
+        """Performs the Network test and records record to self
+
+        Returns: <NetworkRecord>
+        """
         disk_io = psutil.disk_io_counters()
         partitions = psutil.disk_partitions()
         self.list = []

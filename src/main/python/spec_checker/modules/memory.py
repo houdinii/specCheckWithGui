@@ -4,6 +4,14 @@ from spec_checker.modules.utilities import get_size
 
 
 class MemoryRecord:
+    """Holds and records the location of the client device
+
+    Keyword Arguments:
+        total       -- Total memory installed on client device (Default: None)
+        available   -- Available memory installed on client device (Default: None)
+        used        -- Used memory installed on client device (Default: None)
+        percentage  -- Used memory installed on client device as a percentage (Default: None) fixme: Might be free memory
+    """
     def __init__(self, total=None, available=None, used=None, percentage=None):
         self.total = total
         self.available = available
@@ -22,6 +30,10 @@ Used: {self.used}
 Percentage: {self.percentage}"""
 
     def test(self):
+        """Performs the memory test and records record to self
+
+        Returns: <MemoryRecord>
+        """
         uname = platform.uname()
         svmem = psutil.virtual_memory()
         swap = psutil.swap_memory()
