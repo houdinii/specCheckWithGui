@@ -185,7 +185,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         [google_submission]
         enabled = False
         pre url = https://docs.google.com/forms/d/e/
-        form id = ***REMOVED***
+        form id = 1FAIpQLSchMyBXQgKBvLnCqxaO00CiNGVLN2-8i5fF7lW23nLl-tYihA
         post url = /formResponse
         full url = ${pre url}${form id}${post url}
         fields json = fields.json

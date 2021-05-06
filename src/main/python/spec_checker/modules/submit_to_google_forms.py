@@ -22,7 +22,7 @@ def fill_data(specs=spec_checker.modules.spec_record.SpecRecord()):
     google_sheets = {
         "enabled": True,
         "pre_url": "https://docs.google.com/forms/d/e/",
-        "form_id": "***REMOVED***",
+        "form_id": "1FAIpQLSchMyBXQgKBvLnCqxaO00CiNGVLN2-8i5fF7lW23nLl-tYihA",
         "post_url": "/formResponse",
         "fields": {
             "sound_card_present": {
