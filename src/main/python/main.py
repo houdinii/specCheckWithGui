@@ -38,7 +38,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Logging
         self.log = logging.getLogger("SpecChecker Main")
-        self.log.setLevel("INFO")
+        self.log.setLevel("NOTSET")
         self.log.info("Starting Main Application")
 
         # Configuration
@@ -214,6 +214,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         enabled = True
         
         [speedtest]
+        enabled = True
         # options: fast, 
         provider = fast
         
@@ -224,7 +225,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.log.info("Loaded Default Configuration")
 
     def load_logging_configuration(self):
-        """Sets Application Wide Log Level From Configuration"""
+        """todo Sets Application Wide Log Level From Configuration"""
         log_flag = bool(self.config.get('general', 'debug'))
         log_level = self.config.get('general', 'debug level')
         if log_flag is False:
