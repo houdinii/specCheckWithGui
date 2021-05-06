@@ -5,7 +5,16 @@ if sys.platform.startswith('win32'):
 
 class GpuRecord:
     """
-    Single record of GPU item
+    Holds information about the primary graphics processor.
+
+    Keyword Arguments:
+        gpu_id              -- <int> Unique id of GPU (Default: 0)
+        gpu_name            -- GPU Name (Default: None)
+        gpu_load            -- GPU load as a percentage (Default: None)
+        gpu_free_memory     -- GPU free memory (Default: None)
+        gpu_used_memory     -- GPU used memory (Default: None)
+        gpu_total_memory    -- GPU total memory (Default: None)
+        gpu_temperature     -- GPU temperature in fahrenheit (Default: None)
     """
     def __init__(self, gpu_id=0, gpu_name=None, gpu_load=None, gpu_free_memory=None,
                  gpu_used_memory=None, gpu_total_memory=None, gpu_temperature=None):
@@ -34,7 +43,9 @@ GPU Temperature: {self.gpu_temperature}"""
 
 class GpuRecords:
     """
-    A list of GPU Records
+    Holds and records a list of <GpuRecord> based on the specs of the current machine
+
+    Returns: A <GpuRecords> object containing zero or more <GpuRecord> objects.
     """
     def __init__(self, gpu_record_list=None):
         # Check if all list items are GpuRecord and if so, add them to self.
@@ -61,13 +72,19 @@ GPU Temperature: {self.list[0].gpu_temperature}"""
             return "No GPUs Found!"
 
     def addRecord(self, gpu_record):
+        """Adds a <GpuRecord> to <GpuRecords> list"""
         if isinstance(gpu_record, GpuRecord):
             self.list.append(gpu_record)
 
     def test(self):
+        """
+        Performs the GPU test and records record to self
+
+        Returns: <GpuRecord>
+        """
         if sys.platform.startswith('win32'):
             gpus = GPUtil.getGPUs()
-            self.gpu_record_list = []
+            self.list = []
             for gpu in gpus:
                 gpu_record = GpuRecord(
                     gpu_id=gpu.id,

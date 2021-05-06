@@ -3,6 +3,16 @@ from json import JSONDecodeError
 
 
 class LocationRecord:
+    """Holds and records the location of the client device
+
+    Keyword Arguments:
+        ip          -- Current client device IP address (Default: None)
+        city        -- Approximate city of the device (Default: None)
+        region      -- Approximate region of device, typically state in the USA (Default: None)
+        loc         -- Approximate gps location of device (Default: None)
+        org         -- Registered owner of IP address, usually the ISP (Default: None)
+        timezone    -- Timezone of client machine (Default: None)
+    """
     def __init__(self, ip=None, city=None, region=None, loc=None, org=None, timezone=None):
         self.ip = ip
         self.city = city
@@ -25,6 +35,10 @@ Org Size: {self.org}
 Timezone: {self.timezone}"""
 
     def test(self):
+        """Performs the location test and records record to self
+
+        Returns: <LocationRecord>
+        """
         response = requests.get("https://ipinfo.io/")
         response_json = {}
         try:
