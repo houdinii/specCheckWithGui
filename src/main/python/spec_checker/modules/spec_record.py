@@ -62,5 +62,5 @@ class SpecRecord:
             file.write(text)
             file.close()
         except Exception:
-            # print("Error has occurred when trying to write file")
             pass
+            # print("Error has occurred when trying to write file")
