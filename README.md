@@ -1,4 +1,4 @@
-## SpecCheckWithGui --working title--
+## SpecCheckWithGui --In Progress, Working Title--
 SpecCheck is a PC specifications checker with the ability to post results to Google Sheets or email the results to an address listed in the configuration files. This will eventually be cross platform with a port to MacOS being priority.
 
 ## Motivation
@@ -9,15 +9,16 @@ For instance, it's rather easy to determine if a network connection is present, 
 In the end, I decided to make this an actual working project to learn and grow from. I also decided to add a GUI, my first. I plan on fully documenting everything, and hopefully others can get some good use.
  
 ## Screenshots
-Include logo/demo screenshot etc.
+![specChecWithGui Screenshot](specCheck.png)
 
 ## Tech/framework used
 
-<b>Built with</b>
+<b>Built with:</b>
 - [Python](https://www.python.org/)
 - [PyQt5](https://riverbankcomputing.com/software/pyqt)
 - [nose2](https://docs.nose2.io/en/latest/)
 - [fman build system](https://build-system.fman.io/)
+- [PyInstaller](https://www.pyinstaller.org/)
 
 ## Features
 
