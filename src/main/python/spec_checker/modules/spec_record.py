@@ -10,6 +10,7 @@ from spec_checker.modules.memory import MemoryRecord
 from spec_checker.modules.system import SystemRecord
 from spec_checker.modules.webcam import WebcamRecords
 from spec_checker.modules.speedtest import SpeedtestRecord
+from spec_checker.modules.antivirus import AntivirusRecords
 from PyQt5.QtWidgets import QFileDialog
 
 import sys
@@ -30,6 +31,7 @@ class SpecRecord:
         self.system = SystemRecord()
         self.webcams = WebcamRecords()
         self.speedtest = SpeedtestRecord()
+        self.antivirus = AntivirusRecords()
 
     def __repr__(self):
         return "<SpecRecord>"
@@ -44,6 +46,7 @@ class SpecRecord:
 {self.memory}
 {self.network}
 {self.system}
+{self.antivirus}
 {self.webcams}
 {self.speedtest}"""
 

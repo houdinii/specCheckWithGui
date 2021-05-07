@@ -135,6 +135,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.specs.system.test()
         self.updateStatus("Complete\n")
 
+        self.progressBar.setValue(75)
+        self.updateStatus("Starting Antivirus Test......")
+        self.specs.antivirus.test()
+        self.updateStatus("Complete\n")
+
         self.progressBar.setValue(80)
         self.updateStatus("Starting Webcam Test (Light May Blink)......")
         self.specs.webcams.test()
