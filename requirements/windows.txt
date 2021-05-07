@@ -31,7 +31,7 @@ psutil==5.8.0
 pyasn1==0.4.8
 pycparser==2.20
 Pygments==2.9.0
-PyInstaller==3.4
+PyInstaller==3.6
 PyQt5==5.9.2
 PyQt5-stubs==5.15.2.0
 pystache==0.5.4
