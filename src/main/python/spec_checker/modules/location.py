@@ -1,5 +1,7 @@
 import requests
 from json import JSONDecodeError
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class LocationRecord:

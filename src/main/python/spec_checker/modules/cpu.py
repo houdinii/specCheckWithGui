@@ -1,4 +1,6 @@
 import psutil
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class CpuRecord:

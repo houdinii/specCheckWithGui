@@ -1,4 +1,6 @@
 import sys
+import pythoncom
+pythoncom.CoInitialize()
 
 
 def get_size(num_bytes, suffix="B"):

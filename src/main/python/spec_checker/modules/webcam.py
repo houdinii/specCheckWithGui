@@ -1,4 +1,6 @@
 import cv2
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class WebcamRecord:

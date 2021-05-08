@@ -51,6 +51,8 @@ from argparse import ArgumentParser as ArgParser
 from argparse import SUPPRESS as ARG_SUPPRESS
 from io import StringIO, BytesIO
 from io import TextIOWrapper, FileIO
+import pythoncom
+pythoncom.CoInitialize()
 
 
 GZIP_BASE = gzip.GzipFile

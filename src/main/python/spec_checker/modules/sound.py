@@ -1,5 +1,7 @@
 import sys
 if sys.platform.startswith('win32'):
+    import pythoncom
+    pythoncom.CoInitialize()
     import soundcard
 
 

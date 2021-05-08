@@ -1,6 +1,8 @@
 import sys
 if sys.platform.startswith('win32'):
     import GPUtil
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class GpuRecord:
