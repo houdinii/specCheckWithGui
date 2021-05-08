@@ -6,11 +6,11 @@ from spec_checker.modules.utilities import truncate
 from spec_checker.modules.submit_to_google_forms import google_submit
 from spec_checker.windows.MainWindow import Ui_MainWindow
 from spec_checker.windows.About import Ui_AboutBox
-
+from spec_checker.modules.speedtest_net import Speedtest
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
 from PyQt5.QtWidgets import QMainWindow, QDialog, QApplication, QStyle
-from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal, Qt
+from PyQt5.QtCore import QTimer, QObject, QThread, pyqtSignal, Qt, QMutex
 from PyQt5.QtGui import QPalette, QColor
 
 from os import path
@@ -22,12 +22,15 @@ import pdoc
 import logging
 import pythoncom
 
-from spec_checker.modules.speedtest import speed_test
+# from spec_checker.modules.speedtest import speed_test
 pythoncom.CoInitialize()
+
+speed_stage = 0
 
 
 class AboutBox(QDialog, Ui_AboutBox):
     """QT dialog box with version and author information"""
+
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
@@ -37,7 +40,8 @@ class MainTestWorker(QObject):
     finished = pyqtSignal(SpecRecord)
     progress = pyqtSignal(int, str, bool)  # for progress bar
 
-    def __init__(self):
+    def __init__(self, obj=None):
+        QObject().__init__()
         super().__init__()
         self.specs = SpecRecord()
         self.audioInfo = {}
@@ -49,6 +53,9 @@ class MainTestWorker(QObject):
         self.memoryInfo = {}
         self.systemInfo = {}
         self.webcamList = []
+        self.speed_status = False
+        self.progress_timeout = (4 * 1000)
+        self.obj = obj
 
     def test(self):
         # The long running test
@@ -82,14 +89,70 @@ class MainTestWorker(QObject):
         self.specs.antivirus.test()
         self.progress.emit(45, "Webcam", False)
         self.specs.webcams.test()
-        self.progress.emit(50, "Internet Speed (This could take a few minutes!)", False)
-        self.specs.speedtest.test()
+        self.progress.emit(50, "Internet Speed", False)
+        self.speedtest()
         self.progress.emit(100, "", False)
         self.finished.emit(self.specs)
+
+    def speedtest(self):
+        global speed_stage
+        # Speedtest must be done this way outside of the module.
+        servers = []
+        threads = None
+        s = Speedtest()
+        s.get_servers(servers)
+        s.get_best_server()
+        self.change_speed_stage(1)
+
+        s.download(threads=threads)
+        self.change_speed_stage(2)
+
+        s.upload(threads=threads, pre_allocate=False)
+        self.change_speed_stage(3)
+
+        s.results.share()
+        results_dict = s.results.dict()
+        self.change_speed_stage(4)
+
+        # region Fill Results Object
+        if not results_dict:
+            self.specs.speedtest.download_speed = 0.00
+            self.specs.speedtest.upload_speed = 0.00
+            self.specs.speedtest.date = ""
+            self.specs.speedtest.time = ""
+            self.specs.speedtest.ping = ""
+            self.specs.speedtest.isp = ""
+            self.specs.speedtest.ip = ""
+            self.specs.speedtest.share = ""
+        if "download" in results_dict:
+            self.specs.speedtest.download_speed = round(results_dict['download'] / 1000000, 2)
+        if "upload" in results_dict:
+            self.specs.speedtest.upload_speed = round(results_dict['upload'] / 1000000, 2)
+        if "timestamp" in results_dict:
+            timestamp_raw = results_dict['timestamp'].split("T")
+            self.specs.speedtest.date = timestamp_raw[0]
+            self.specs.speedtest.time = timestamp_raw[1]
+        if "ping" in results_dict:
+            self.specs.speedtest.ping = results_dict['ping']
+        if "client" in results_dict:
+            self.specs.speedtest.client = results_dict['client']
+            if "isp" in self.specs.speedtest.client:
+                self.specs.speedtest.isp = self.specs.speedtest.client['isp']
+            if "ip" in self.specs.speedtest.client:
+                self.specs.speedtest.ip = self.specs.speedtest.client['ip']
+        if "share" in results_dict:
+            self.specs.speedtest.share = results_dict['share']
+        # endregion
+        self.change_speed_stage(5)
+
+    def change_speed_stage(self, stage):
+        global speed_stage
+        speed_stage = stage
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     """QT main window"""
+
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
@@ -124,37 +187,60 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.systemInfo = {}
         self.webcamList = []
 
+        self.timer = QTimer()
+        self.speed_check_timeout = (1000 * 1)
+
     def finished(self, spec_record):
         self.btnStart.setEnabled(True)
+        self.btnStart.setDisabled(False)
         self.btnStart.setText("Start")
         self.specs = spec_record
         # google_submit(self.specs)
         self.specs.write_to_file()
-        # self.btnStart.setDisabled(False)
 
     def runAllTests(self):
         self.thread = QThread()
-        self.worker = MainTestWorker()
+        self.worker = MainTestWorker(obj=self)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.test)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.worker.progress.connect(self.reportProgress)
+        # self.worker.progress.connect(self.speed_progress)
         self.thread.start()
-
+        self.timer.start(self.speed_check_timeout)
+        self.timer.timeout.connect(self.check_stage)
         self.btnStart.setDisabled(True)
+        self.btnStart.setEnabled(False)
         self.btnStart.setText("Running Tests...")
         self.worker.finished.connect(self.finished)
         self.thread.finished.connect(
             lambda: self.updateStatus("\n\n All Tests Complete!")
         )
 
+    def check_stage(self):
+        global speed_stage
+        if speed_stage == 1:
+            self.reportProgress(60, "dot")
+        if speed_stage == 2:
+            self.reportProgress(70, "dot")
+        if speed_stage == 3:
+            self.reportProgress(80, "dot")
+        if speed_stage == 4:
+            self.reportProgress(90, "dot")
+        if speed_stage == 5:
+            self.progressBar.setValue(100)
+        if speed_stage <= 0 or speed_stage >= 6:
+            self.reportProgress(-99, "dot")
+
     def reportProgress(self, percentage, module_name=None, first_pass=True):
         if not first_pass:
             self.updateStatus("Complete\n")
-        if module_name is not None and module_name != "":
+        if module_name is not None and module_name != "" and module_name != "dot":
             self.updateStatus(f"Scanning {module_name}..........")
+        if module_name == "dot":
+            self.updateStatus(".")
 
         if 100 >= percentage >= 0 and isinstance(percentage, int):
             self.progressBar.setValue(percentage)
@@ -265,6 +351,7 @@ if __name__ == '__main__':
     palette.setColor(QPalette.ToolTipBase, Qt.black)
     palette.setColor(QPalette.ToolTipText, Qt.white)
     palette.setColor(QPalette.Text, Qt.white)
+    palette.setColor(QPalette.PlaceholderText, Qt.gray)
     palette.setColor(QPalette.Button, QColor(53, 53, 53))
     palette.setColor(QPalette.ButtonText, Qt.white)
     palette.setColor(QPalette.BrightText, Qt.red)
@@ -275,5 +362,5 @@ if __name__ == '__main__':
     appctxt = ApplicationContext()  # 1. Instantiate ApplicationContext
     window = MainWindow()
     window.show()
-    exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
+    exit_code = appctxt.app.exec_()  # 2. Invoke appctxt.app.exec_()
     sys.exit(exit_code)

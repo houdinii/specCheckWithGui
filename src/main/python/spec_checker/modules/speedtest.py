@@ -3,79 +3,17 @@ import asyncio
 # import spec_checker.modules.fast_speedtest as fast
 from spec_checker.modules.speedtest_net import Speedtest
 from spec_checker.modules.utilities import truncate
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
+# from main import speed_stage
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, QTimer
 from asyncqt import asyncSlot
 import asyncio
 import pythoncom
 pythoncom.CoInitialize()
 
+speed_stage = 0
 
-async def speed_test(fut):
-    servers = []
-    threads = None
-    s = Speedtest()
-    s.get_servers(servers)
-    s.get_best_server()
-    s.download(threads=threads)
-    s.upload(threads=threads, pre_allocate=False)
-    s.results.share()
-    results_dict = s.results.dict()
-    if "download" in results_dict:
-        download = round(results_dict['download'] / 1000000, 2)
-    else:
-        download = 0.00
-    if "upload" in results_dict:
-        upload = round(results_dict['upload'] / 1000000, 2)
-    else:
-        upload = 0.00
-    if "timestamp" in results_dict:
-        timestamp_raw = results_dict['timestamp'].split("T")
-        date = timestamp_raw[0]
-        time = timestamp_raw[1]
-    else:
-        date = ""
-        time = ""
-    if "ping" in results_dict:
-        ping = results_dict['ping']
-    else:
-        ping = ""
-    if "ping" in results_dict:
-        ping = results_dict['ping']
-    else:
-        ping = ""
-    client = None
-    if "client" in results_dict:
-        client = results_dict['client']
-        if "isp" in client:
-            isp = client['isp']
-        else:
-            isp = ""
-        if "ip" in client:
-            ip = client['ip']
-        else:
-            ip = ""
-    else:
-        isp = ""
-        ip = ""
-    if "share" in results_dict:
-        share = results_dict['share']
-    else:
-        share = ""
 
-    results = {
-        'download_speed': download,
-        'upload_speed': upload,
-        'date': date,
-        'time': time,
-        'ping': ping,
-        'client': client,
-        'isp': isp,
-        'ip': ip,
-        'share': share,
-    }
 
-    fut.set_result(results)
-    return results
 
 
 class SpeedtestRecord:
@@ -105,19 +43,56 @@ Time: {self.time}
 ISP: {self.isp}
 IP Address: {self.ip}
 Share Link: {self.share}"""
-
-    def test(self):
-        loop = asyncio.new_event_loop()
-        fut = loop.create_future()
-        asyncio.set_event_loop(loop)
-        speed_result = loop.run_until_complete(speed_test(fut))
-        self.download_speed = speed_result['download_speed']
-        self.upload_speed = speed_result['upload_speed']
-        self.ping = speed_result['ping']
-        self.date = speed_result['date']
-        self.time = speed_result['time']
-        self.client = speed_result['client']
-        self.isp = speed_result['isp']
-        self.ip = speed_result['ip']
-        self.share = speed_result['share']
-        return self
+    
+    # def test(self):
+    #     global speed_stage
+    #     # Speedtest must be done this way outside of the module.
+    #     servers = []
+    #     threads = None
+    #     s = Speedtest()
+    #     s.get_servers(servers)
+    #     s.get_best_server()
+    #     change_speed_stage(1)
+    #
+    #     s.download(threads=threads)
+    #     change_speed_stage(2)
+    #
+    #     s.upload(threads=threads, pre_allocate=False)
+    #     change_speed_stage(3)
+    #
+    #     s.results.share()
+    #     results_dict = s.results.dict()
+    #     change_speed_stage(4)
+    #
+    #     # region Fill Results Object
+    #     if not results_dict:
+    #         self.download_speed = 0.00
+    #         self.upload_speed = 0.00
+    #         self.date = ""
+    #         self.time = ""
+    #         self.ping = ""
+    #         self.isp = ""
+    #         self.ip = ""
+    #         self.share = ""
+    #     if "download" in results_dict:
+    #         self.download_speed = round(results_dict['download'] / 1000000, 2)
+    #     if "upload" in results_dict:
+    #         self.upload_speed = round(results_dict['upload'] / 1000000, 2)
+    #     if "timestamp" in results_dict:
+    #         timestamp_raw = results_dict['timestamp'].split("T")
+    #         self.date = timestamp_raw[0]
+    #         self.time = timestamp_raw[1]
+    #     if "ping" in results_dict:
+    #         self.ping = results_dict['ping']
+    #     if "client" in results_dict:
+    #         self.client = results_dict['client']
+    #         if "isp" in self.client:
+    #             self.isp = self.client['isp']
+    #         if "ip" in self.client:
+    #             self.ip = self.client['ip']
+    #     if "share" in results_dict:
+    #         self.share = results_dict['share']
+    #
+    #     # endregion
+    #     change_speed_stage(5)
+    #
