@@ -20,8 +20,10 @@ import time
 import configparser
 import pdoc
 import logging
+import pythoncom
 
 from spec_checker.modules.speedtest import speed_test
+pythoncom.CoInitialize()
 
 
 class AboutBox(QDialog, Ui_AboutBox):
@@ -29,6 +31,61 @@ class AboutBox(QDialog, Ui_AboutBox):
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
+
+
+class MainTestWorker(QObject):
+    finished = pyqtSignal(SpecRecord)
+    progress = pyqtSignal(int, str, bool)  # for progress bar
+
+    def __init__(self):
+        super().__init__()
+        self.specs = SpecRecord()
+        self.audioInfo = {}
+        self.list_gpus = []
+        self.cpuInfo = {}
+        self.networkInfo = {}
+        self.hard_drive_list = []
+        self.locationInfo = {}
+        self.memoryInfo = {}
+        self.systemInfo = {}
+        self.webcamList = []
+
+    def test(self):
+        # The long running test
+        self.progress.emit(0, "Sound Devices", True)
+        if sys.platform.startswith('win32'):
+            try:
+                import pythoncom
+                pythoncom.CoInitialize()
+                import soundcard
+                self.specs.sound.test()
+            except RuntimeError as e:
+                print("SOUND ERROR!")
+        elif sys.platform.startswith('darwin'):
+            pass
+
+        self.progress.emit(10, "Graphics Card", False)
+        self.specs.gpus.test()
+        self.progress.emit(15, "CPU", False)
+        self.specs.cpu.test()
+        self.progress.emit(20, "Hard Drives", False)
+        self.specs.harddrives.test()
+        self.progress.emit(25, "Location", False)
+        self.specs.location.test()
+        self.progress.emit(30, "Memory", False)
+        self.specs.memory.test()
+        self.progress.emit(35, "Network", False)
+        self.specs.network.test()
+        self.progress.emit(36, "System In General", False)
+        self.specs.system.test()
+        self.progress.emit(40, "Antivirus", False)
+        self.specs.antivirus.test()
+        self.progress.emit(45, "Webcam", False)
+        self.specs.webcams.test()
+        self.progress.emit(50, "Internet Speed (This could take a few minutes!)", False)
+        self.specs.speedtest.test()
+        self.progress.emit(100, "", False)
+        self.finished.emit(self.specs)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -67,6 +124,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.systemInfo = {}
         self.webcamList = []
 
+    def finished(self, spec_record):
+        self.btnStart.setEnabled(True)
+        self.btnStart.setText("Start")
+        self.specs = spec_record
+        # google_submit(self.specs)
+        self.specs.write_to_file()
+        # self.btnStart.setDisabled(False)
+
+    def runAllTests(self):
+        self.thread = QThread()
+        self.worker = MainTestWorker()
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.test)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.progress.connect(self.reportProgress)
+        self.thread.start()
+
+        self.btnStart.setDisabled(True)
+        self.btnStart.setText("Running Tests...")
+        self.worker.finished.connect(self.finished)
+        self.thread.finished.connect(
+            lambda: self.updateStatus("\n\n All Tests Complete!")
+        )
+
+    def reportProgress(self, percentage, module_name=None, first_pass=True):
+        if not first_pass:
+            self.updateStatus("Complete\n")
+        if module_name is not None and module_name != "":
+            self.updateStatus(f"Scanning {module_name}..........")
+
+        if 100 >= percentage >= 0 and isinstance(percentage, int):
+            self.progressBar.setValue(percentage)
+
     def showAbout(self):
         """Show the about box"""
         dlg = AboutBox()
@@ -86,82 +178,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Clear the status text in the main text area of the app"""
         self.statusText = ""
         self.txtStatus.setPlainText("")
-
-    def runAllTests(self):
-        """Performs the tests as outlined by configuration"""
-        # This too is a long running task
-
-        self.btnStart.setDisabled(True)
-        self.clearStatus()
-        # With config files, hook goes here!
-
-        self.progressBar.setValue(0)
-        self.updateStatus("Starting Audio Test......")
-        if sys.platform.startswith('win32'):
-            self.specs.sound.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(10)
-        self.updateStatus("Starting Video Test......")
-        self.specs.gpus.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(20)
-        self.updateStatus("Starting CPU Test......")
-        self.specs.cpu.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(30)
-        self.updateStatus("Starting Hard Drive Test......")
-        self.specs.harddrives.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(40)
-        self.updateStatus("Starting Location Test......")
-        self.specs.location.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(50)
-        self.updateStatus("Starting Memory Test......")
-        self.specs.memory.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(60)
-        self.updateStatus("Starting Network Test......")
-        self.specs.network.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(70)
-        self.updateStatus("Starting General System Test......")
-        self.specs.system.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(75)
-        self.updateStatus("Starting Antivirus Test......")
-        self.specs.antivirus.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(80)
-        self.updateStatus("Starting Webcam Test (Light May Blink)......")
-        self.specs.webcams.test()
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(90)
-        self.updateStatus("Starting Speedtest......")
-        loop = asyncio.new_event_loop()
-        fut = loop.create_future()
-        asyncio.set_event_loop(loop)
-        speed_result = loop.run_until_complete(speed_test(fut))
-        self.specs.speedtest.download_speed = speed_result['download_speed']
-        self.specs.speedtest.upload_speed = speed_result['upload_speed']
-        self.specs.speedtest.ping = speed_result['ping']
-        self.updateStatus("Complete\n")
-
-        self.progressBar.setValue(100)
-        google_submit(self.specs)
-        self.specs.write_to_file()
-        self.updateStatus("All Tests Complete!\n")
-        self.btnStart.setDisabled(False)
 
     def load_configuration(self, filename='config.ini'):
         """Check if a configuration file exists. If it does, load it
