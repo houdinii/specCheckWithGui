@@ -67,6 +67,8 @@ Timestamp: {self.list[0].timestamp}"""
         :returns AntivirusRecord
         """
         if plt == "Windows":
+            import pythoncom
+            pythoncom.CoInitialize()
             import wmi
             from win32com.client import GetObject
 

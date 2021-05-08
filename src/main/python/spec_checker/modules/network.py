@@ -2,6 +2,8 @@ import sys
 import psutil
 if sys.platform.startswith('win32'):
     import pywifi
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class NetworkRecord:

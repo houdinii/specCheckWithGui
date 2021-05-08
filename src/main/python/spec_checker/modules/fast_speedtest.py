@@ -5,6 +5,8 @@ from statistics import mean
 from time import time
 
 from aiohttp import ClientSession
+import pythoncom
+pythoncom.CoInitialize()
 
 MIN_DURATION = 15
 MAX_DURATION = 40

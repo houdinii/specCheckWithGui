@@ -1,6 +1,8 @@
 import requests
 
 import spec_checker.modules.spec_record
+import pythoncom
+pythoncom.CoInitialize()
 
 
 def google_submit(spec_object=spec_checker.modules.spec_record.SpecRecord()):

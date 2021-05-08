@@ -1,6 +1,8 @@
 import platform
 import psutil
 from spec_checker.modules.utilities import get_size
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class MemoryRecord:

@@ -15,6 +15,8 @@ from PyQt5.QtWidgets import QFileDialog
 
 import sys
 from os.path import expanduser
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class SpecRecord:

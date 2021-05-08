@@ -1,6 +1,8 @@
 import platform
 from datetime import datetime
 import psutil
+import pythoncom
+pythoncom.CoInitialize()
 
 
 class SystemRecord:
