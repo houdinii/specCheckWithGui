@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# The below code has been modified by Brian Barnes AKA Houdinii (2021). Code specific to Python 2 was removed to aid compiling.
+# As such, no changes to the underlying license have been made.
+#
 # Copyright 2012 Matt Martz
 # All Rights Reserved.
 #
