@@ -1,10 +1,13 @@
 .idea
 venv
+env
 target
 dist.bak
 build.bak
-main.spec.bak
+main.spec.bakcd
 /acopyover/
 results.txt
 /src/main/python/.coverage
 /private/
+/src/build/settings/secret.json
+/src/sign/windows/certificate.pfx

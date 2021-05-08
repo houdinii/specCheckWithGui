@@ -89,6 +89,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def runAllTests(self):
         """Performs the tests as outlined by configuration"""
+        # This too is a long running task
 
         self.btnStart.setDisabled(True)
         self.clearStatus()
