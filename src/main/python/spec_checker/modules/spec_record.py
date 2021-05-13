@@ -11,6 +11,7 @@ from spec_checker.modules.system import SystemRecord
 from spec_checker.modules.webcam import WebcamRecords
 from spec_checker.modules.speedtest import SpeedtestRecord
 from spec_checker.modules.antivirus import AntivirusRecords
+from spec_checker.modules.submit_using_email import FormSubmitRecord
 from PyQt5.QtWidgets import QFileDialog
 
 import sys
@@ -34,6 +35,7 @@ class SpecRecord:
         self.webcams = WebcamRecords()
         self.speedtest = SpeedtestRecord()
         self.antivirus = AntivirusRecords()
+        self.email = FormSubmitRecord()
 
     def __repr__(self):
         return "<SpecRecord>"

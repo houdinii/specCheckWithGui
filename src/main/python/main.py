@@ -190,13 +190,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.timer = QTimer()
         self.speed_check_timeout = (1000 * 1)
 
+        # Setup email submission from configuration
+        fields = self.config.get(json.loads("email_submission", "fields"))
+        if fields:
+            self.specs.email.fields = fields
+        email_provider = self.config.get(json.loads("email_submission", "email_provider"))
+        if email_provider:
+            self.specs.email.email_provider = email_provider
+        send_address = self.config.get(json.loads("email_submission", "send_address"))
+        if send_address:
+            self.specs.email.send_address = send_address
+        subject = self.config.get(json.loads("email_submission", "subject"))
+        if subject:
+            self.specs.email.subject = subject
+        template = self.config.get(json.loads("email_submission", "template"))
+        if template:
+            self.specs.email.template = template
+        autoresponse = self.config.get(json.loads("email_submission", "autoresponse"))
+        if autoresponse:
+            self.specs.email.autoresponse = autoresponse
+        cc_addresses = self.config.get(json.loads("email_submission", "cc_addresses"))
+        if cc_addresses:
+            self.specs.email.cc_addresses = cc_addresses
+        webhook = self.config.get(json.loads("email_submission", "webhook"))
+        if webhook:
+            self.specs.email.webhook = webhook
+        url = self.config.get(json.loads("email_submission", "url"))
+        if url:
+            self.specs.email.url = url
+
     def finished(self, spec_record):
         self.btnStart.setEnabled(True)
         self.btnStart.setDisabled(False)
         self.btnStart.setText("Start")
         self.specs = spec_record
-        # google_submit(self.specs)
-        self.specs.write_to_file()
+        self.specs.email.submit(data=self.specs)
+        # self.specs.write_to_file()
 
     def runAllTests(self):
         self.thread = QThread()
@@ -287,16 +316,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         [email_submission]
         enabled = False
-        fields json = fields.json
         # Not Yet Implemented
-        
-        [google_submission]
-        enabled = False
-        pre url = https://docs.google.com/forms/d/e/
-        form id = ***REMOVED***
-        post url = /formResponse
-        full url = ${pre url}${form id}${post url}
-        fields json = fields.json
         
         [cpu]
         enabled = True

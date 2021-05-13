@@ -21,7 +21,7 @@ class MemoryRecord:
         self.percentage = percentage
 
     def __repr__(self):
-        return f"<MemoryRecord total:{self.city} used: {self.used} available: {self.available} percentage:{self.region}>"
+        return f"<MemoryRecord total:{self.total} used: {self.used} available: {self.available} percentage:{self.percentage}>"
 
     def __str__(self):
         return f"""
