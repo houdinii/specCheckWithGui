@@ -36,6 +36,8 @@ class SpecRecord:
         self.speedtest = SpeedtestRecord()
         self.antivirus = AntivirusRecords()
         self.email = FormSubmitRecord()
+        self.client_name = ""
+        self.client_email_address = ""
 
     def __repr__(self):
         return "<SpecRecord>"

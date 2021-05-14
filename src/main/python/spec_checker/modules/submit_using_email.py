@@ -4,6 +4,8 @@ import json
 import requests
 
 SPEC_FIELDS = [
+    "client_name",
+    "client_email_address",
     "sound_card_present",
     "default_sound_card",
     "mic_present",
@@ -84,8 +86,16 @@ Email Provider: {self.email_provider}"""
 
 class FormSubmitRecord(EmailRecord):
     def __init__(self, fields=None, email_provider="internal", send_address=None, subject=None,
-                 template=None, autoresponse=None, cc_addresses=None, webhook=None, url=None):
+                 template=None, autoresponse=None, cc_addresses=None, webhook=None, url=None, client_name=None, client_email_address=None):
         super().__init__()
+        if client_name is not None:
+            self.client_name = client_name
+        else:
+            self.client_name = "Name Not Provided"
+        if client_email_address is not None:
+            self.client_email_address = client_email_address
+        else:
+            self.client_email_address = "Email Not Provided"
         if fields is not None:
             self.fields = fields
             pass
@@ -93,31 +103,151 @@ class FormSubmitRecord(EmailRecord):
             self.fields = SPEC_FIELDS
         if email_provider is not None:
             self.email_provider = email_provider
+        else:
+            self.email_provider = ""
         if send_address is not None:
             self.send_address = send_address
+        else:
+            self.send_address = ""
         if subject is not None:
             self.subject = subject
+        else:
+            self.subject = ""
         if template is not None:
             self.template = template
+        else:
+            self.template = ""
         if autoresponse is not None:
             self.autoresponse = autoresponse
+        else:
+            self.autoresponse = ""
         if cc_addresses is not None:
             self.cc_addresses = cc_addresses
+        else:
+            self.cc_addresses = ""
         if webhook is not None:
             self.webhook = webhook
+        else:
+            self.webhook = ""
         if url is not None:
             self.url = url
+        else:
+            self.url = ""
 
-    def submit(self, data=None):
+    def submit(self,
+               data=None,
+               fields=None,
+               email_provider=None,
+               send_address=None,
+               subject=None,
+               template=None,
+               autoresponse=None,
+               cc_addresses=None,
+               webhook=None,
+               url=None,
+               client_name=None,
+               client_email_address=None):
+
+        if client_name is None and self.client_name is not None:
+            client_name = self.client_name
+        elif client_name is not None and self.client_name is None:
+            self.client_name = client_name
+        elif client_name is not None and self.client_name is not None:
+            self.client_name = client_name
+        else:
+            client_name = "Name Not Provided"
+        if client_email_address is None and self.client_email_address is not None:
+            client_email_address = self.client_email_address
+        elif client_email_address is not None and self.client_email_address is None:
+            self.client_email_address = client_email_address
+        elif client_email_address is not None and self.client_email_address is not None:
+            self.client_email_address = client_email_address
+        else:
+            client_email_address = "Email Not Provided"
+
+        if fields is None and self.fields is not None:
+            fields = self.fields
+        elif fields is not None and self.fields is None:
+            self.fields = fields
+        elif fields is not None and self.fields is not None:
+            self.fields = fields
+        else:
+            fields = [""]
+        if email_provider is None and self.email_provider is not None:
+            email_provider = self.email_provider
+        elif email_provider is not None and self.email_provider is None:
+            self.email_provider = email_provider
+        elif email_provider is not None and self.email_provider is not None:
+            self.email_provider = email_provider
+        else:
+            email_provider = "internal"
+        if send_address is None and self.send_address is not None:
+            send_address = self.send_address
+        elif send_address is not None and self.send_address is None:
+            self.send_address = send_address
+        elif send_address is not None and self.send_address is not None:
+            self.send_address = send_address
+        else:
+            send_address = ""
+        if subject is None and self.subject is not None:
+            subject = self.subject
+        elif subject is not None and self.subject is None:
+            self.subject = subject
+        elif subject is not None and self.subject is not None:
+            self.subject = subject
+        else:
+            subject = "Specification Results"
+        if template is None and self.template is not None:
+            template = self.template
+        elif template is not None and self.template is None:
+            self.template = template
+        elif template is not None and self.template is not None:
+            self.template = template
+        else:
+            template = "None"
+        if autoresponse is None and self.autoresponse is not None:
+            autoresponse = self.autoresponse
+        elif autoresponse is not None and self.autoresponse is None:
+            self.autoresponse = autoresponse
+        elif autoresponse is not None and self.autoresponse is not None:
+            self.autoresponse = autoresponse
+        else:
+            autoresponse = "False"
+        if cc_addresses is None and self.cc_addresses is not None:
+            cc_addresses = self.cc_addresses
+        elif cc_addresses is not None and self.cc_addresses is None:
+            self.cc_addresses = cc_addresses
+        elif cc_addresses is not None and self.cc_addresses is not None:
+            self.cc_addresses = cc_addresses
+        else:
+            cc_addresses = ""
+        if webhook is None and self.webhook is not None:
+            webhook = self.webhook
+        elif webhook is not None and self.webhook is None:
+            self.webhook = webhook
+        elif webhook is not None and self.webhook is not None:
+            self.webhook = webhook
+        else:
+            webhook = ""
+        if url is None and self.url is not None:
+            url = self.url
+        if url is not None and self.url is None:
+            self.url = url
+        elif url is not None and self.url is not None:
+            self.url = url
+        else:
+            url = "InvalidURL"
         specs = data
         email_data = {
-            "email_provider": f"{self.email_provider}",
-            "send_address": f"{self.send_address}",
-            "subject": f"{self.subject}",
-            "template": f"{self.template}",
-            "autoresponse": f"{self.autoresponse}",
-            "cc_addresses": f"{self.cc_addresses}",
-            "webhook": f"{self.webhook}",
+            "email_provider": f"{email_provider}",
+            "client_name": f"{client_name}",
+            "client_email_address": f"{client_email_address}",
+            "send_address": f"{send_address}",
+            "subject": f"{subject}",
+            "template": f"{template}",
+            "autoresponse": f"{autoresponse}",
+            "cc_addresses": f"{cc_addresses}",
+            "webhook": f"{webhook}",
             "specs_msg": {
                 "sound_card_present": {
                     "name": "Sound Card Present",
@@ -300,10 +430,9 @@ class FormSubmitRecord(EmailRecord):
                     "value": str(specs.speedtest.share)
                 }
             },
-            "fields": f"{self.fields}"
+            "fields": f"{fields}"
         }
-        url = f"{self.url}"
-        print(json.dumps(email_data))
+        # print(json.dumps(email_data))
         request = requests.post(url, data=json.dumps(email_data))
-        print(request)
+        # print(request)
         return request

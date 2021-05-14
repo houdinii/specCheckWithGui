@@ -17,6 +17,7 @@ from os import path
 import os
 import sys
 import time
+import json
 import configparser
 import pdoc
 import logging
@@ -142,6 +143,9 @@ class MainTestWorker(QObject):
                 self.specs.speedtest.ip = self.specs.speedtest.client['ip']
         if "share" in results_dict:
             self.specs.speedtest.share = results_dict['share']
+            # This is a stub image for testing purposes only so I can comment out the speed test and still get the
+            # speedtest image for the email.
+            # self.specs.speedtest.share = "http://www.speedtest.net/result/11415663530.png"
         # endregion
         self.change_speed_stage(5)
 
@@ -190,41 +194,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.timer = QTimer()
         self.speed_check_timeout = (1000 * 1)
 
-        # Setup email submission from configuration
-        fields = self.config.get(json.loads("email_submission", "fields"))
-        if fields:
-            self.specs.email.fields = fields
-        email_provider = self.config.get(json.loads("email_submission", "email_provider"))
-        if email_provider:
-            self.specs.email.email_provider = email_provider
-        send_address = self.config.get(json.loads("email_submission", "send_address"))
-        if send_address:
-            self.specs.email.send_address = send_address
-        subject = self.config.get(json.loads("email_submission", "subject"))
-        if subject:
-            self.specs.email.subject = subject
-        template = self.config.get(json.loads("email_submission", "template"))
-        if template:
-            self.specs.email.template = template
-        autoresponse = self.config.get(json.loads("email_submission", "autoresponse"))
-        if autoresponse:
-            self.specs.email.autoresponse = autoresponse
-        cc_addresses = self.config.get(json.loads("email_submission", "cc_addresses"))
-        if cc_addresses:
-            self.specs.email.cc_addresses = cc_addresses
-        webhook = self.config.get(json.loads("email_submission", "webhook"))
-        if webhook:
-            self.specs.email.webhook = webhook
-        url = self.config.get(json.loads("email_submission", "url"))
-        if url:
-            self.specs.email.url = url
-
     def finished(self, spec_record):
         self.btnStart.setEnabled(True)
         self.btnStart.setDisabled(False)
         self.btnStart.setText("Start")
         self.specs = spec_record
-        self.specs.email.submit(data=self.specs)
+
+        # Setup email submission from configuration
+        self.specs.email.client_name = self.txtName.text()
+        self.specs.email.client_email_address = self.txtEmail.text()
+        self.specs.email.fields = json.loads(self.config.get("email_submission", "fields"))
+        self.specs.email.email_provider = self.config.get("email_submission", "email_provider")
+        self.specs.email.send_address = self.config.get("email_submission", "send_address")
+        self.specs.email.subject = self.config.get("email_submission", "subject")
+        self.specs.email.template = self.config.get("email_submission", "template")
+        self.specs.email.autoresponse = self.config.get("email_submission", "autoresponse")
+        self.specs.email.cc_addresses = self.config.get("email_submission", "cc_addresses")
+        self.specs.email.webhook = self.config.get("email_submission", "webhook")
+        self.specs.email.url = self.config.get("email_submission", "api_url")
+        self.log.error(f"url: {self.specs.email.url}")
+        self.specs.email.submit(data=self.specs,
+                                email_provider=self.specs.email.email_provider,
+                                send_address=self.specs.email.send_address,
+                                subject=self.specs.email.subject,
+                                template=self.specs.email.template,
+                                autoresponse=self.specs.email.autoresponse,
+                                cc_addresses=self.specs.email.cc_addresses,
+                                webhook=self.specs.email.webhook,
+                                url=self.specs.email.url,
+                                client_name=self.specs.email.client_name,
+                                client_email_address=self.specs.email.client_email_address)
         # self.specs.write_to_file()
 
     def runAllTests(self):
@@ -384,3 +383,4 @@ if __name__ == '__main__':
     window.show()
     exit_code = appctxt.app.exec_()  # 2. Invoke appctxt.app.exec_()
     sys.exit(exit_code)
+    # waitress-serve --port=8000 specs:app

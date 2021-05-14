@@ -32,14 +32,14 @@ Default Mic: {self.default_mic}"""
 
         if len(self.sound_cards) > 0:
             self.sound_card_present = True
-            self.default_sound_card = soundcard.default_speaker()
+            self.default_sound_card = str(soundcard.default_speaker()).replace("<", "").replace(">", "")
         else:
             self.sound_card_present = False
             self.default_sound_card = "No default sound card found. May not be enabled or plugged in."
 
         if len(self.mics) > 0:
             self.mic_present = True
-            self.default_mic = soundcard.default_microphone()
+            self.default_mic = str(soundcard.default_microphone()).replace("<", "").replace(">", "")
         else:
             self.mic_present = False
             self.default_mic = "No default mic found. May not be enabled or plugged in."
