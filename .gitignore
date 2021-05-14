@@ -11,3 +11,4 @@ results.txt
 /private/
 /src/build/settings/secret.json
 /src/sign/windows/certificate.pfx
+config.ini

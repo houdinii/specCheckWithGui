@@ -17,6 +17,7 @@ from os import path
 import os
 import sys
 import time
+import json
 import configparser
 import pdoc
 import logging
@@ -142,6 +143,9 @@ class MainTestWorker(QObject):
                 self.specs.speedtest.ip = self.specs.speedtest.client['ip']
         if "share" in results_dict:
             self.specs.speedtest.share = results_dict['share']
+            # This is a stub image for testing purposes only so I can comment out the speed test and still get the
+            # speedtest image for the email.
+            # self.specs.speedtest.share = "http://www.speedtest.net/result/11415663530.png"
         # endregion
         self.change_speed_stage(5)
 
@@ -195,8 +199,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btnStart.setDisabled(False)
         self.btnStart.setText("Start")
         self.specs = spec_record
-        # google_submit(self.specs)
-        self.specs.write_to_file()
+
+        # Setup email submission from configuration
+        self.specs.email.client_name = self.txtName.text()
+        self.specs.email.client_email_address = self.txtEmail.text()
+        self.specs.email.fields = json.loads(self.config.get("email_submission", "fields"))
+        self.specs.email.email_provider = self.config.get("email_submission", "email_provider")
+        self.specs.email.send_address = self.config.get("email_submission", "send_address")
+        self.specs.email.subject = self.config.get("email_submission", "subject")
+        self.specs.email.template = self.config.get("email_submission", "template")
+        self.specs.email.autoresponse = self.config.get("email_submission", "autoresponse")
+        self.specs.email.cc_addresses = self.config.get("email_submission", "cc_addresses")
+        self.specs.email.webhook = self.config.get("email_submission", "webhook")
+        self.specs.email.url = self.config.get("email_submission", "api_url")
+        self.log.error(f"url: {self.specs.email.url}")
+        self.specs.email.submit(data=self.specs,
+                                email_provider=self.specs.email.email_provider,
+                                send_address=self.specs.email.send_address,
+                                subject=self.specs.email.subject,
+                                template=self.specs.email.template,
+                                autoresponse=self.specs.email.autoresponse,
+                                cc_addresses=self.specs.email.cc_addresses,
+                                webhook=self.specs.email.webhook,
+                                url=self.specs.email.url,
+                                client_name=self.specs.email.client_name,
+                                client_email_address=self.specs.email.client_email_address)
+        # self.specs.write_to_file()
 
     def runAllTests(self):
         self.thread = QThread()
@@ -287,16 +315,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         [email_submission]
         enabled = False
-        fields json = fields.json
         # Not Yet Implemented
-        
-        [google_submission]
-        enabled = False
-        pre url = https://docs.google.com/forms/d/e/
-        form id = ***REMOVED***
-        post url = /formResponse
-        full url = ${pre url}${form id}${post url}
-        fields json = fields.json
         
         [cpu]
         enabled = True
@@ -364,3 +383,4 @@ if __name__ == '__main__':
     window.show()
     exit_code = appctxt.app.exec_()  # 2. Invoke appctxt.app.exec_()
     sys.exit(exit_code)
+    # waitress-serve --port=8000 specs:app
